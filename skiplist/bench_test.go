@@ -23,7 +23,7 @@ func compare(k, l int) int {
 // `build` returns a skiplist with the values 0, ..., `n`-1.  The values are
 // added in a random order.
 func build(n int) *skiplist.Skiplist[int] {
-    sl := skiplist.New(compare)
+    sl := skiplist.New(true, compare)
     for _, v := range rand.Perm(n) {
         sl.Add(v)
     }
@@ -32,7 +32,7 @@ func build(n int) *skiplist.Skiplist[int] {
 
 // `random` returns a skiplist with `n` random integers.
 func random(n int) *skiplist.Skiplist[int] {
-    sl := skiplist.New(compare)
+    sl := skiplist.New(true, compare)
     //sl.SetHeight(8)
     for sl.Len() < n {
         sl.Add(rand.Int())
@@ -133,19 +133,23 @@ func BenchmarkTree_Lookup(b *testing.B) {
 
 
 func BenchmarkBuild(b *testing.B) {
-    b.StopTimer()
-    b.ReportAllocs()
-    perm := rand.Perm(100000)
-    base := skiplist.New(compare)
-    for _, v := range perm[0:50000] {
-        base.Add(v)
-    }
-    for i := 0; i < b.N; i++ {
-        global = base.Clone(func(v int) int { return v })
-        b.StartTimer()
-        for _, v := range perm[50000:] {
-            global.Add(v)
-        }
-        b.StopTimer()
+    for _, size := range sizes {
+        b.Run(fmt.Sprintf("%d", size), func(b *testing.B) {
+            b.StopTimer()
+            b.ReportAllocs()
+            perm := rand.Perm(size)
+            base := skiplist.New(true, compare)
+            for _, v := range perm[0:size/2] {
+                base.Add(v)
+            }
+            for i := 0; i < b.N; i++ {
+                global = base.Clone(func(v int) int { return v })
+                b.StartTimer()
+                for _, v := range perm[size/2:] {
+                    global.Add(v)
+                }
+                b.StopTimer()
+            }
+        })
     }
 }

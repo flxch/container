@@ -3,8 +3,8 @@ package skiplist
 
 // `FromSlice` creates a skip list where its elements are ordered by `cmp`.  The
 // skip list contains the values in `ds`.
-func FromSlice[Data any](cmp func(Data, Data) int, ds []Data) *Skiplist[Data] {
-    r := New[Data](cmp)
+func FromSlice[Data any](prealloc bool, cmp func(Data, Data) int, ds []Data) *Skiplist[Data] {
+    r := New[Data](prealloc, cmp)
     for _, d := range ds {
         r.Add(d)
     }
