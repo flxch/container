@@ -1,5 +1,3 @@
-package tree
-
 // Go package for balanced search trees based on left-leaning red-black trees
 // (2-3 balanced search trees).
 
@@ -76,3 +74,6 @@ package tree
 // BenchmarkLlrb_Lookup/100      	 4326193	       282.0 ns/op	      16 B/op	       1 allocs/op
 // BenchmarkLlrb_Lookup/1000     	 3517029	       351.1 ns/op	      16 B/op	       1 allocs/op
 // BenchmarkLlrb_Lookup/10000    	 2805577	       426.6 ns/op	      16 B/op	       1 allocs/op
+
+package tree
+
