@@ -3,7 +3,7 @@ package tree_test
 import (
     "fmt"
     "testing"
-    "math/rand"
+    "math/rand/v2"
 
     "github.com/petar/GoLLRB/llrb"
 )

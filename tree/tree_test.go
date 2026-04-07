@@ -1,7 +1,7 @@
 package tree_test
 
 import (
-    "math/rand"
+    "math/rand/v2"
     "testing"
     "github.com/flxch/container/tree"
 )

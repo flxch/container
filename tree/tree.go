@@ -2,7 +2,7 @@ package tree
 
 
 // A variable of the type `Tree` stores the data elements in a (left-leaning)
-// red-black tree.  The data elements can be `any` type.  The `compare` function
+// red-black tree.  The data elements can be of `any` type.  A compare function
 // orders the data elements.
 type Tree[Data any] struct {
     // The number of nodes in the tree.
