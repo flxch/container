@@ -41,7 +41,7 @@ func build(n int) *tree.Tree[int] {
 func random(n int) *tree.Tree[int] {
     t := tree.New(compare)
     for t.Len() < n {
-        t.Add(rand.Int())
+        t.Insert(rand.Int())
     }
     return t
 }
