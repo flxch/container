@@ -23,7 +23,8 @@ func compare(k, l int) int {
 // `build` returns a skiplist with the values 0, ..., `n`-1.  The values are
 // added in a random order.
 func build(n int) *skiplist.Skiplist[int] {
-    sl := skiplist.New(true, compare)
+    sl := skiplist.New(compare)
+    sl.SetPrealloc(6)
     for _, v := range rand.Perm(n) {
         sl.Add(v)
     }
@@ -32,8 +33,8 @@ func build(n int) *skiplist.Skiplist[int] {
 
 // `random` returns a skiplist with `n` random integers.
 func random(n int) *skiplist.Skiplist[int] {
-    sl := skiplist.New(true, compare)
-    //sl.SetHeight(8)
+    sl := skiplist.New(compare)
+    sl.SetPrealloc(6)
     for sl.Len() < n {
         sl.Add(rand.Int())
     }
@@ -138,7 +139,8 @@ func BenchmarkBuild(b *testing.B) {
             b.StopTimer()
             b.ReportAllocs()
             perm := rand.Perm(size)
-            base := skiplist.New(true, compare)
+            base := skiplist.New(compare)
+            base.SetPrealloc(6)
             for _, v := range perm[0:size/2] {
                 base.Add(v)
             }

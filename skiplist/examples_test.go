@@ -8,7 +8,7 @@ import (
 
 
 func ExampleSkiplist() {
-    sl := skiplist.New[string](false, strings.Compare)
+    sl := skiplist.New[string](strings.Compare)
 
     sl.Add("foo")
     sl.Add("goo")

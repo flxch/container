@@ -48,12 +48,19 @@ func (e *Element[Data]) height() int {
 // `clone` returns a clone of the element `e` and links it to the skip list `l`.
 // For clining the element's value, it uses the function `clone`.
 // NOTE: The next and previous pointers are not set, since this cannot be done
-// properly locally.
+// properly locally here.
 // (Helper function used by the Clone method for skip lists.)
-func (e *Element[Data]) clone(l *Skiplist[Data], clone func(Data) Data) *Element[Data] {
-    return &Element[Data]{
-        list:      l,
-        neighbors: make([]neighbors[Data], e.height(), e.height()),
-        Value:     clone(e.Value),
+func (e *Element[Data]) clone(l *Skiplist[Data], clone func(Data) Data, elems []Element[Data], ns []neighbors[Data]) (*Element[Data], []Element[Data], []neighbors[Data]) {
+    if len(elems) == 0 || len(ns) == 0 {
+        return &Element[Data]{
+            list:      l,
+            neighbors: make([]neighbors[Data], e.height(), e.height()),
+            Value:     clone(e.Value),
+        }
     }
+    f := elems[0:]
+    f.list = l
+    f.neighbors = ns[:e.height():e.height()]
+    f.Value = clone(e.Value)
+    return &f, elems[1:], ns[e.height():]
 }

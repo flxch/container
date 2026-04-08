@@ -7,27 +7,6 @@ import (
 )
 
 
-const (
-    // Internally, the elements in a skip list have a height, which is randomly
-    // chosen for each element.  For small skip lists, small heights works best
-    // (performance and memory).  For large skip lists, a too small maximal
-    // height will most likely result in performance reductions.
-    // `delfaultMaxHeight` seems to work well for skip lists with up to
-    // 1,000,000 elements.  If the skip list has significantly more than
-    // 1,000,000 elements, a larger the maximal height might work better.  Use
-    // the function `SetHeight` to change a skip list's maximal element height.
-    defaultMaxHeight = 32
-
-    // As the height of internal elements are randomly chosen, one can set the
-    // seed for generating the random height values.  Use the function `SetSeed`
-    // to change a skip list's seeds.
-    defaultSeed1     = 1
-    defaultSeed2     = 2
-
-    defaultPrealloc  = 10
-)
-
-
 // A variable of the type `Skiplist` stores data elements of a type in a skip
 // list.  The skip list's type can be any type but elements must be ordered.
 // The order of elements is determined by a compare function.
@@ -45,22 +24,23 @@ type Skiplist[Data any] struct {
     // Random number generator for setting the height of an element.
     rand     *rand.Rand
     // Preallocation of memory for some performance gains.  Higher memory
-    // consumption.
-    prealloc []neighbors[Data]
+    // consumption though.
+    prealloc int
+    preelems []neighbors[Data]
 }
 
 
 // `New` returns an empty skip list.  List elements are ordered by the function
 // `cmp`.
-func New[Data any](prealloc bool, cmp func(Data, Data) int) *Skiplist[Data] {
-    return new(Skiplist[Data]).Init(prealloc, cmp)
+func New[Data any](cmp func(Data, Data) int) *Skiplist[Data] {
+    return new(Skiplist[Data]).Init(cmp)
 }
 
 // `Init` initializes or clears the skip list `l`.  List elements are ordered by
 // the function `cmp`.
-func (l *Skiplist[Data]) Init(prealloc bool, cmp func(Data, Data) int) *Skiplist[Data] {
+func (l *Skiplist[Data]) Init(cmp func(Data, Data) int) *Skiplist[Data] {
     l.cmp = cmp
-    l.heights = make([]int, max(defaultMaxHeight, len(l.heights)))
+    l.heights = make([]int, max(DefaultMaxHeight, len(l.heights)))
     l.root.neighbors = make([]neighbors[Data], l.Height())
     for k := 0; k < l.Height(); k++ {
         l.root.neighbors[k].next = &l.root
@@ -69,11 +49,9 @@ func (l *Skiplist[Data]) Init(prealloc bool, cmp func(Data, Data) int) *Skiplist
     l.len = 0
     l.max = 0
     if l.rand == nil {
-        l.rand = rand.New(rand.NewPCG(defaultSeed1, defaultSeed2))
+        l.rand = rand.New(rand.NewPCG(DefaultSeed1, DefaultSeed2))
     }
-    if prealloc {
-        l.prealloc = preallocNeighbors[Data](l.Height())
-    }
+    l.prealloc = DefaultPrealloc
     return l
 }
 
@@ -102,14 +80,14 @@ func (l *Skiplist[Data]) Clone(clone func(Data) Data) *Skiplist[Data] {
         len:     l.Len(),
         heights: slices.Clone(l.heights),
         max:     l.max,
-        rand:    l.rand, //rand.New(rand.NewPCG(defaultSeed1 + 1, defaultSeed2 + 1)),
+        rand:    l.rand, //rand.New(rand.NewPCG(DefaultSeed1 + 1, DefaultSeed2 + 1)),
     }
     // QUESTION: Should we use the same random generator or should we create a
     // new one.  If we create a new one, we should use different seeds,
     // otherwise we obtain the same sequence of numbers again for c.
 
-    if l.prealloc != nil {
-        c.prealloc = preallocNeighbors[Data](c.Height())
+    if l.prealloc > 0 {
+        c.SetPrealloc(c.prealloc)
     }
 
     p := make([]*Element[Data], l.Height())
@@ -119,14 +97,14 @@ func (l *Skiplist[Data]) Clone(clone func(Data) Data) *Skiplist[Data] {
         c.root.neighbors[k].prev = &c.root
     }
 
-    // TODO: Allocate memory for the cloned elements at once and not separately
-    // for each element separately.
-    //elems := make([]Elements, l.Len())
-    //neighbors := make([]neighbors, l.max * l.Len())
+    elems := make([]Element[Data], l.Len())
+    neighbors := make([]neighbors[Data], l.max * l.Len())
 
     e := l.root.neighbors[0].next
     for i := 0; i < l.Len(); i++ {
-        f := e.clone(c, clone)
+        var f *Element[Data]
+        f, elems, neighbors = e.clone(c, clone, elems, neighbors)
+
         for k := 0; k < len(e.neighbors); k++ {
             f.neighbors[k].prev = p[k]
             p[k].neighbors[k].next = f
@@ -197,12 +175,6 @@ func (l *Skiplist[Data]) SetHeight(h int) {
             l.heights = append(l.heights, make([]int, d)...)
         }
     }
-}
-
-// `SetSeed` changes the seed for the pseudo-random generator for the height of
-// new elements to `s`.
-func (l *Skiplist[Data]) SetSeed(s, t uint64) {
-    l.rand = rand.New(rand.NewPCG(s, t))
 }
 
 
@@ -319,27 +291,29 @@ func (l *Skiplist[Data]) find(val Data) *Element[Data] {
     return q
 }
 
+// `newNeighbors` returns the neighbors part for an new element of the skip list
+// `l`.
 func (l *Skiplist[Data]) newNeighbors() []neighbors[Data] {
     h := l.newElementHeight()
-    if l.prealloc == nil {
+    if l.prealloc < 1 {
+        // No preallocation of memory for skip list elements.
         return make([]neighbors[Data], h)
     }
-    if h > len(l.prealloc) {
-        // No enough neighbors pre-allocated.  New pre-allocation.  Note that
-        // allocating a big junk of memory at once is less expensive than
-        // allocating many times small memory junks.  However, the running times
-        // of some operations become less predicable.  In the rare case, when
-        // they allocate a big memory jung, they take more time.
-        l.prealloc = preallocNeighbors[Data](l.Height())
+    if h > len(l.preelems) {
+        // No enough memory preallocated.  New pre-allocation of a memory junk
+        // for new skip list elements.
+        l.SetPrealloc(l.prealloc)
     }
-    r := l.prealloc[:h:h]
-    l.prealloc = l.prealloc[h:]
+    r := l.preelems[:h:h]
+    l.preelems = l.preelems[h:]
     return r
 }
 
 // `newElementHeight` returns the height for a new element in the skip list `l`.
 func (l *Skiplist[Data]) newElementHeight() int {
     if h := bits.TrailingZeros64(l.rand.Uint64() & ((1 << uint(l.Height())) - 1)); h < l.max {
+        // TODO: The probabiliy of choosing a too large height might be too
+        // large. Check!
         return 1 + h
     }
     if l.max == 0 || l.max < len(l.heights) && l.heights[l.max - 1] > 0 {
@@ -348,6 +322,3 @@ func (l *Skiplist[Data]) newElementHeight() int {
     return 1
 }
 
-func preallocNeighbors[Data any](h int) []neighbors[Data] {
-    return make([]neighbors[Data], h << defaultPrealloc)
-}

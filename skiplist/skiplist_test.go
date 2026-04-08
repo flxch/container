@@ -49,18 +49,18 @@ func (l *Skiplist[Data]) sanity() bool {
 // Unit tests
 
 func TestString(t *testing.T) {
-    l := New[int](false, func(x, y int) int { return x - y})
+    l := New[int](func(x, y int) int { return x - y})
     if s := l.String(); s != "[]" {
         t.Errorf("Wrong string representation: %s, epxected []", s)
     }
-    l = FromSlice[int](false, func(x, y int) int { return x - y}, []int{1, 2, 3, 4, 5})
+    l = FromSlice[int](func(x, y int) int { return x - y}, []int{1, 2, 3, 4, 5})
     if s := l.String(); s != "[1,2,3,4,5]" {
         t.Errorf("Wrong string representation: %s, epxected []", s)
     }
 }
 
 func TestClone(t *testing.T) {
-    l := New[int](false, func(x, y int) int { return x - y})
+    l := New[int](func(x, y int) int { return x - y})
     c := l.Clone(func(x int) int { return x })
     if l.Len() != c.Len() {
         t.Errorf("Lengths are not the same.")
@@ -71,7 +71,7 @@ func TestClone(t *testing.T) {
         }
     }
 
-    l = FromSlice[int](false, func(x, y int) int { return x - y}, []int{1, 2, 3, 4, 5})
+    l = FromSlice[int](func(x, y int) int { return x - y}, []int{1, 2, 3, 4, 5})
     c = l.Clone(func(x int) int { return x })
     if l.Len() != c.Len() {
         t.Errorf("Lengths are not the same.")
@@ -104,7 +104,7 @@ func cmp(x, y kvpair) int {
 }
 
 func TestNew(t *testing.T) {
-    l := New[kvpair](false, cmp)
+    l := New[kvpair](cmp)
     if !l.sanity() {
         t.Errorf("ordering or pointers are wrong in skip list: %s", l)
     }
@@ -120,7 +120,7 @@ func TestNew(t *testing.T) {
 }
 
 func TestAdd1(t *testing.T) {
-    l := New[kvpair](false, cmp)
+    l := New[kvpair](cmp)
     l.Add(kvpair{0, "foo"})
     if !l.sanity() {
         t.Errorf("ordering or pointers are wrong in skip list: %s", l)
@@ -141,7 +141,7 @@ func TestAdd1(t *testing.T) {
 }
 
 func TestAdd(t *testing.T) {
-    l := New[kvpair](false, cmp)
+    l := New[kvpair](cmp)
     l.Add(kvpair{0, "foo"})
     l.Add(kvpair{2, "goo"})
     l.Add(kvpair{1, "moo"})
@@ -164,7 +164,7 @@ func TestAdd(t *testing.T) {
 }
 
 func TestAddEqual(t *testing.T) {
-    l := New[kvpair](false, cmp)
+    l := New[kvpair](cmp)
     l.Add(kvpair{0, "foo"})
     l.Add(kvpair{2, "goo"})
     l.Add(kvpair{4, "baz"})
@@ -184,7 +184,7 @@ func TestAddEqual(t *testing.T) {
 }
 
 func TestLookup1(t *testing.T) {
-    l := New[kvpair](false, cmp)
+    l := New[kvpair](cmp)
     l.Add(kvpair{0, "foo"})
     l.Add(kvpair{1, "moo"})
     l.Add(kvpair{3, "goo"})
@@ -199,7 +199,7 @@ func TestLookup1(t *testing.T) {
 }
 
 func TestLookup2(t *testing.T) {
-    l := New[kvpair](false, cmp)
+    l := New[kvpair](cmp)
     l.Add(kvpair{0, "foo"})
     l.Add(kvpair{2, "goo"})
     l.Add(kvpair{5, "baz"})
@@ -222,7 +222,7 @@ func TestLookup2(t *testing.T) {
 }
 
 func TestRemove(t *testing.T) {
-    l := New[kvpair](false, cmp)
+    l := New[kvpair](cmp)
     l.Add(kvpair{0, "foo"})
     l.Add(kvpair{2, "goo"})
     l.Add(kvpair{5, "baz"})
@@ -248,7 +248,7 @@ func TestRemove(t *testing.T) {
 
 /*
 func _TestElementHeight(t *testing.T) {
-    list := New[kvpair](false, less)
+    list := New[kvpair](less)
     N := 100000
     heights := make([]int, defaultMaxHeight)
     for i := 0; i < N; i++ {

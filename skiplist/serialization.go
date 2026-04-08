@@ -6,10 +6,6 @@ import (
 )
 
 
-// `ElemSep` specifies the string that separates data items when converting a
-// tree into a string by the `String()` method.
-var ElemSep string = ","
-
 // `String` returns the string representation of the skip list `l`.
 func (l *Skiplist[Data]) String() string {
     var b strings.Builder
