@@ -46,6 +46,35 @@ func BenchmarkTree_Add(b *testing.B) {
     }
 }
 
+// Benchmark the insertion of a value into a tree.
+// (no dublicates)
+func BenchmarkTree_Insert(b *testing.B) {
+    for _, size := range sizes {
+        b.Run(fmt.Sprintf("%d", size), func(b *testing.B) {
+            b.StopTimer()
+            b.ReportAllocs()
+            // Generate a random tree containing `size` values.
+            global = random(size)
+            for i := 0; i < b.N; i++ {
+                var value int
+                // Find a value that is not in the tree.
+                for {
+                    value = rand.Int()
+                    if _, ok := global.Lookup(value); !ok {
+                        break
+                    }
+                }
+                b.StartTimer()
+                global.Insert(value)
+                b.StopTimer()
+                // Remove the value again, since we want to benchmark the
+                // insertion of a value into a tree of a fixed size.
+                global.Remove(value)
+            }
+        })
+    }
+}
+
 // Benchmark the deletion of an existing value in a tree.
 func BenchmarkTree_Remove(b *testing.B) {
     for _, size := range sizes {

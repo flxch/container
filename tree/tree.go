@@ -39,28 +39,33 @@ func (t *Tree[Data]) Clone(clone func(Data) Data) *Tree[Data] {
     if t.root == nil {
         return New(t.compare)
     }
+    // It is faster to the allocate memory for all nodes in the cloned tree at
+    // once instead of creating the cloned nodes separately.
+    r, _ := t.root.clone(clone, make([]node[Data], t.Len()))
     return &Tree[Data]{
         count:   t.count,
-        root:    t.root.clone(clone),
+        root:    r,
         compare: t.compare,
     }
 }
 
-func (n *node[Data]) clone(clone func(Data) Data) *node[Data] {
-    // clone assumes that n is not nil.
-    c := &node[Data]{
-        data:  clone(n.data),
-        black: n.black,
-    }
+// `clone` assumes that `n` is not nil.
+func (n *node[Data]) clone(clone func(Data) Data, ns []node[Data]) (*node[Data], []node[Data]) {
+    // Get fresh node from the node list for cloning.
+    c := &ns[0]
+    ns = ns[1:]
+    // Set fields for clone.
+    c.data = clone(n.data)
+    c.black = n.black
     // It is slightly faster to check whether the node's children exist instead
     // of always calling clone (even when they are nil).
     if n.left != nil {
-        c.left = n.left.clone(clone)
+        c.left, ns = n.left.clone(clone, ns)
     }
     if n.right != nil {
-        c.right = n.right.clone(clone)
+        c.right, ns = n.right.clone(clone, ns)
     }
-    return c
+    return c, ns
 }
 
 // `Reset` empties the tree `t`.
