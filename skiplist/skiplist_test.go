@@ -2,6 +2,7 @@ package skiplist
 
 import (
     "fmt"
+    "math/rand/v2"
     "testing"
 )
 
@@ -294,6 +295,57 @@ func TestReset(t *testing.T) {
     }
     if e := l.Lookup(kvpair{5, "baz"}); e != nil {
         t.Errorf("expected not find element 5 in skip list")
+    }
+}
+
+func TestSetHeight(t *testing.T) {
+    l := New[int](func(x, y int) int { return x - y })
+    l.SetHeight(2)
+
+    elems := rand.Perm(300)
+    for _, v := range elems[:100] {
+        l.Add(v)
+    }
+    t.Logf("%v", l)
+    t.Logf("height count: %v", l.heights)
+    if !l.sanity() {
+        t.Errorf("wrong order in skip list: %s", l)
+    }
+    if l.Len() != 100 {
+        t.Errorf("wrong length %d of skip list", l.Len())
+    }
+
+    l.SetHeight(4)
+    for _, v := range elems[100:200] {
+        l.Add(v)
+    }
+    t.Logf("%v", l)
+    t.Logf("height count: %v", l.heights)
+    if !l.sanity() {
+        t.Errorf("wrong order in skip list: %s", l)
+    }
+    if l.Len() != 200 {
+        t.Errorf("wrong length %d of skip list", l.Len())
+    }
+
+    l.SetHeight(3)
+    for _, v := range elems[200:300] {
+        l.Add(v)
+    }
+    t.Logf("%v", l)
+    t.Logf("height count: %v", l.heights)
+    if !l.sanity() {
+        t.Errorf("wrong order in skip list: %s", l)
+    }
+    if l.Len() != 300 {
+        t.Errorf("wrong length %d of skip list", l.Len())
+    }
+    u := 0
+    for v := range l.AscendGeq(1) {
+        if u + 1 != v {
+            t.Errorf("expected the successor of %d, not %d", u, v)
+        }
+        u = v
     }
 }
 
