@@ -10,24 +10,25 @@ import (
 // Examples.
 
 func ExampleOption() {
-    u := opt.Some("foo")
-    v := opt.Some(1)
-    w := opt.None[int]()
+    u := option.Some("foo")
+    v := option.Some(1)
+    w := option.None[int]()
 
     fmt.Printf("%s, %s, %s\n", u, v, w)
 
     // Return values from functions.
-    kvpairs := map[string]int{"foo": 0, "moo": 1}
+    kvstore := map[string]int{"foo": 0, "moo": 1}
 
-    // Unfortunately, the assignment `u := Wrap[int](kvpairs["bar"])` is ill
+    // Unfortunately, the assignment `u := Wrap[int](kvstore["bar"])` is ill
     // typed.  The return value of the lookup kvpairs["bar"] is an int and not
-    // and int and a bool.  With the auxiliary function lookup, a pair of int
-    // and bool is returned that can wrapped into an Option.
-    // (Similarly, a type cast like `u := Wrap(v.(int))` is ill typed since
-    // v.(int) is not a pair of an int and a bool.)
+    // and int and a bool.  (Maybe this will change in later Go versions and
+    // both types are possible.)
 
-    // To overcome this, we can define a lookup function.
-    lookup := func(s string) (int, bool) { n, ok := kvpairs[s]; return n, ok }
+    // With the auxiliary function lookup below, the return type is the pair of
+    // an int and a bool that can wrapped into an Option.  (Similarly, a type
+    // cast like `u := Wrap(v.(int))` is ill typed since v.(int) is not a pair
+    // of an int and a bool.)
+    lookup := func(s string) (int, bool) { n, ok := kvstore[s]; return n, ok }
     // Go does not allow type parameters here.  A generic lookup function could
     // be defined as follows:
     // func lookup[K comparable, V any](m map[K]V, k K) (V, bool) {
@@ -36,8 +37,8 @@ func ExampleOption() {
     // }
 
     // Wrap return value.
-    x := opt.Wrap(lookup("bar"))
-    y := opt.Wrap(lookup("foo"))
+    x := option.Wrap(lookup("bar"))
+    y := option.Wrap(lookup("foo"))
 
     fmt.Printf("bar -> %s\n", x)
     fmt.Printf("foo -> %s\n", y)
@@ -52,19 +53,19 @@ func ExampleOption() {
 // Tests.
 
 func TestOptional_String(t *testing.T) {
-    if u := opt.Some(1); u.String() != "Some(1)" {
+    if u := option.Some(1); u.String() != "Some(1)" {
         t.Errorf("expected Some(1), not %s", u)
     }
-    if u := opt.Some("foo"); u.String() != "Some(foo)" {
+    if u := option.Some("foo"); u.String() != "Some(foo)" {
         t.Errorf("expected Some(foo), not %s", u)
     }
-    if u := opt.None[string](); u.String() != "None" {
+    if u := option.None[string](); u.String() != "None" {
         t.Errorf("expected None, not %s", u)
     }
 }
 
 func TestOptional_Some(t *testing.T) {
-    u := opt.Some(1)
+    u := option.Some(1)
 
     if !u.IsSome() {
         t.Errorf("expected some value")
@@ -82,7 +83,7 @@ func TestOptional_Some(t *testing.T) {
 }
 
 func TestOptional_None(t *testing.T) {
-    u := opt.None[int]()
+    u := option.None[int]()
 
     if !u.IsNone() {
         t.Errorf("expected no value")
@@ -105,7 +106,7 @@ func TestOptional_None(t *testing.T) {
 }
 
 func TestOptional_Zero(t *testing.T) {
-    u := opt.Zero[int]()
+    u := option.Zero[int]()
 
     var n int
     if u.IsNone() {
