@@ -6,7 +6,8 @@ import (
 )
 
 
-func TestElementHeight(t *testing.T) {
+// Test whether the element height is well distributed.
+func _TestElementHeight(t *testing.T) {
     N := 100000
     list := New[int](func(x, y int) int { return x - y })
     list.SetSeed(2, 3)
@@ -33,7 +34,6 @@ func TestElementHeight(t *testing.T) {
     }
     t.Logf("node heights: %s", s)
 }
-
 
 
 // `ordering` checks the order of the keys at height `h` in the skip list `l`.

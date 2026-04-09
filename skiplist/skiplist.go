@@ -321,4 +321,3 @@ func (l *Skiplist[Data]) newElementHeight() int {
     }
     return 1
 }
-

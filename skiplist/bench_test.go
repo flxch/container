@@ -49,6 +49,8 @@ var global *skiplist.Skiplist[int]
 
 // Benchmark the insertion of a value into a skiplist.
 func BenchmarkSkiplist_Add(b *testing.B) {
+    //skiplist.DefaultSeed1 = 143
+    //skiplist.DefaultSeed2 = 34
     for _, size := range sizes {
         b.Run(fmt.Sprintf("%d", size), func(b *testing.B) {
             b.StopTimer()
@@ -127,6 +129,49 @@ func BenchmarkTree_Lookup(b *testing.B) {
                 // Remove the value again, since we want to benchmark the lookup
                 // of a value for a tree of a fixed size.
                 global.Remove(elem)
+            }
+        })
+    }
+}
+
+
+func BenchmarkIterators(b *testing.B) {
+    var sum int
+
+    // The old style before the introduction of range iterators.
+    for _, size := range sizes {
+        b.Run(fmt.Sprintf("%d elems", size), func(b *testing.B) {
+            b.StopTimer()
+            b.ReportAllocs()
+            perm := rand.Perm(size)
+            sl := skiplist.New(compare)
+            for _, v := range perm {
+                sl.Add(v)
+            }
+            b.StartTimer()
+            for i := 0; i < b.N; i++ {
+                for elem := sl.Front(); elem != nil; elem = elem.Next() {
+                    sum += elem.Value
+                }
+            }
+        })
+    }
+
+    // The new style using range iterators (slower!)
+    for _, size := range sizes {
+        b.Run(fmt.Sprintf("%d range", size), func(b *testing.B) {
+            b.StopTimer()
+            b.ReportAllocs()
+            perm := rand.Perm(size)
+            sl := skiplist.New(compare)
+            for _, v := range perm {
+                sl.Add(v)
+            }
+            b.StartTimer()
+            for i := 0; i < b.N; i++ {
+                for val := range sl.WalkAscend {
+                    sum += val
+                }
             }
         })
     }
