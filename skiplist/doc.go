@@ -7,7 +7,6 @@ package skiplist
 // TODOs
 // * Change API (avoid exporting the element type, unify with tree package).
 // * Allow skiplists to contain equal data values (insert versus add).
-// * Add iterators (ascend and descend).
 // * Add examples (for various skiplist methods and the iterators).
 // * Add more tests.
 // * Add JSON marshaling (serialization.go).
