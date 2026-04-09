@@ -17,8 +17,8 @@ func ExampleResult() {
         return n / m, nil
     }
 
-    r := res.Wrap(div(8, 2))
-    s := res.Wrap(div(8, 0))
+    r := result.Wrap(div(8, 2))
+    s := result.Wrap(div(8, 0))
 
     fmt.Printf("%v\n", r)
     fmt.Printf("%v\n", s)
@@ -32,9 +32,9 @@ func ExampleResult() {
 // Tests.
 
 func TestResult(t *testing.T) {
-    r := res.Ok(4)
-    s := res.Ok("foo")
-    u := res.Err[int](fmt.Errorf("division by zero"))
+    r := result.Ok(4)
+    s := result.Ok("foo")
+    u := result.Err[int](fmt.Errorf("division by zero"))
 
     if !r.IsOk() || !s.IsOk() {
         t.Errorf("expected a value")
@@ -71,11 +71,11 @@ func TestWrap(t *testing.T) {
         return n / m, nil
     }
 
-    r := res.Wrap(div(8, 2))
+    r := result.Wrap(div(8, 2))
     if k, err := r.Unwrap(); err != nil || k != 4 {
         t.Errorf("failed to unwrap result %s", r)
     }
-    s := res.Wrap(div(8, 0))
+    s := result.Wrap(div(8, 0))
     if _, err := s.Unwrap(); err == nil {
         t.Errorf("failed to unwrap result %s", r)
     }
