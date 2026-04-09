@@ -28,7 +28,7 @@ func (t *Tree[Data]) String() string {
     return b.String()
 }
 
-// `MarshalJSON' returns the JSON representation of the tree `t` as a list in
+// `MarshalJSON` returns the JSON representation of the tree `t` as a list in
 // which the tree elements are ordered ascendingly.
 func (t *Tree[Data]) MarshalJSON() ([]byte, error) {
     min, ok := t.Minimum()
@@ -61,7 +61,7 @@ func (t *Tree[Data]) MarshalJSON() ([]byte, error) {
     return bs, err
 }
 
-// `UnmarshalJSON' modifies the tree `t` into the tree that contains the JSON
+// `UnmarshalJSON` modifies the tree `t` into the tree that contains the JSON
 // elements of `data`.  The JSON object must be a list.  Its elements do not
 // need to be ordered.
 func (t *Tree[Data]) UnmarshalJSON(data []byte) error {

@@ -11,7 +11,6 @@ import (
 type tcIterator[Data any] struct {
     elements []Data
     pivot    Data
-    expected []Data
 }
 
 var tcsIterators []tcIterator[string] = []tcIterator[string]{
@@ -19,6 +18,10 @@ var tcsIterators []tcIterator[string] = []tcIterator[string]{
     tcIterator[string]{
         elements: []string{"foo", "goo", "bar", "baz"},
         pivot:    "aaaa",
+    },
+    tcIterator[string]{
+        elements: []string{"foo", "goo", "bar", "baz"},
+        pivot:    "zzzz",
     },
     tcIterator[string]{
         elements: []string{"foo", "goo", "bar", "baz"},
@@ -122,7 +125,7 @@ func TestDescendLeq(t *testing.T) {
     }
 }
 
-func TestAscendGereater(t *testing.T) {
+func TestAscendGreater(t *testing.T) {
     for i, tc := range tcsIterators {
         sl := skiplist.New[string](strings.Compare)
         for _, elem := range tc.elements {
