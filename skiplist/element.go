@@ -56,9 +56,9 @@ func (e *Element[Data]) clone(l *Skiplist[Data], clone func(Data) Data, elems []
             list:      l,
             neighbors: make([]neighbors[Data], e.height(), e.height()),
             Value:     clone(e.Value),
-        }
+        }, nil, nil
     }
-    f := elems[0:]
+    f := elems[0]
     f.list = l
     f.neighbors = ns[:e.height():e.height()]
     f.Value = clone(e.Value)
