@@ -113,7 +113,7 @@ func (l *Skiplist[Data]) WalkDescendLeq(pivot Data) func(func(Data) bool) {
 // starts at the smallest element that is smaller than `pivot`.
 func (l *Skiplist[Data]) WalkDescendLess(pivot Data) func(func(Data) bool) {
     elem := l.findDescendLeq(pivot)
-    if l.cmp(elem.Value, pivot) == 0 {
+    if elem != nil && l.cmp(elem.Value, pivot) == 0 {
         elem = elem.Prev()
     }
     return func(yield func(Data) bool) {
