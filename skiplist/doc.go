@@ -1,4 +1,4 @@
-// Go package for generic skiplists.
+// Go package for generic skip lists.
 
 // Under development.
 
@@ -6,7 +6,6 @@ package skiplist
 
 // TODOs
 // * Change API (avoid exporting the element type, unify with tree package). (?)
-// * Allow skip lists to contain equal data values (insert versus add). (?)
 // * Add examples (for various skip list methods and the iterators).
 // * Add more tests.
 // * Add pool for elements (optional when creating skip list).  However, we

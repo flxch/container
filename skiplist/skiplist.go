@@ -193,44 +193,19 @@ func (l *Skiplist[Data]) Lookup(val Data) *Element[Data] {
 }
 
 
-// `Add` returns the element in the skip list `l` with value `val`.  If there is
-// no such element, then `Add` inserts it into `l`.  If `l` already contains an
-// element of the same order as `val`, 'val` is still inserted to the skip list.
-func (l *Skiplist[Data]) Add(val Data) *Element[Data] {
-    e := l.find(val)
-    if e.list == nil {
-        // Complete new element and make it an element of the skip list.
-        e.Value = val
-        for h := e.height() - 1; h >= 0; h-- {
-            e.neighbors[h].next = e.neighbors[h].prev.neighbors[h].next
-            e.neighbors[h].next.neighbors[h].prev, e.neighbors[h].prev.neighbors[h].next = e, e
-        }
-        e.list = l
-        l.len++
-        l.heights[e.height() - 1]++
-        //if e.height() > l.max && l.max < len(l.heights) {
-        //    l.max = e.height()
-        //}
-    } else {
-        // QUESTION: Does it make sense to store the additional value in e? That is, e has a list
-        // elements. Note that if we would add to the skip list, we would have a sub skip list of
-        // equal elements.  Elements would be a container again. Or, we count how often the
-        // element was inserted.  Maybe want to also change the tree package.
-        // ... TODO
-        // We could add a new field to the Element type Misc of type any.
-
-        // This new field could instantiated with a counter or with a slice if
-        // we want to store vals with the same order.
-        // Note that we return Element and the caller could instantiate Misc appropriately to its use case.
-
-    }
-    return e
-}
-
-// `Insert` returns the element in the skip list `l` with value `val`.  If there
+// `Add` returns the element in the skip list `l` with value `val`.  If there
 // is no such element, then `Insert` inserts it into `l`.  If `l` already
 // contains an element of the same order as `val`, the element is not changed.
-func (l *Skiplist[Data]) Insert(val Data) *Element[Data] {
+//
+// Note that by assigning a value to the element's `Value` field, one overwrites
+// the value stored in the skip list.  Furthermore, note that not allowing that
+// a skip list stores two or more elements with the same order is without loss
+// of generality.  For instance, one could extend the `Data` type with a second
+// component that stores the elements of the same order.  For some uses a
+// counter as a second component would already be sufficient.  The counter
+// stores the number of occurences.  For such uses, one could write a wrapper
+// package that uses the skiplist package.
+func (l *Skiplist[Data]) Add(val Data) *Element[Data] {
     e := l.find(val)
     if e.list == nil {
         // New value.  Make it an element of the skip list.
