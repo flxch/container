@@ -4,6 +4,9 @@ package skiplist
 // `WalkAscend` calls the function `op` in ascending order for all the elements'
 // data items in the skip list `l`.
 func (l *Skiplist[Data]) WalkAscend(op func(Data)) {
+    // Using an op of type func(*Element[Data]) would be more general. For
+    // instance, we could update the value. However, the ordering of the
+    // elements must not change.
     for e := l.Front(); e != nil; e = e.Next() {
         op(e.Value)
     }

@@ -28,7 +28,7 @@ var (
     DefaultSeed2     uint64 = 2
 
     // Preallocation of large memory junks for elements that might be added to a
-    // skiplist in the future can result in some performance gains.  The reason
+    // skip list in the future can result in some performance gains.  The reason
     // is that allocating a big junk of memory at once is less expensive than
     // allocating many times small memory junks.  However, the running times of
     // some operations become less predicable.  In the rare case, when they

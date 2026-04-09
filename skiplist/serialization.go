@@ -22,7 +22,7 @@ func (l *Skiplist[Data]) String() string {
 }
 
 
-// `MarshalJSON` returns the JSON representation of the skiplist `l` as a list in
+// `MarshalJSON` returns the JSON representation of the skip list `l` as a list in
 // which the list's elements are ordered ascendingly.
 func (l *Skiplist[Data]) MarshalJSON() ([]byte, error) {
     bs := []byte("[")

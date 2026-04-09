@@ -116,7 +116,7 @@ func TestClone(t *testing.T) {
 }
 
 
-// For the following tests, the skiplists store key-value pairs, where the keys
+// For the following tests, the skip lists store key-value pairs, where the keys
 // are ordered.
 type kvpair struct {
     key int

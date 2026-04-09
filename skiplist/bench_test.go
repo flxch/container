@@ -20,7 +20,7 @@ func compare(k, l int) int {
     }
 }
 
-// `build` returns a skiplist with the values 0, ..., `n`-1.  The values are
+// `build` returns a skip list with the values 0, ..., `n`-1.  The values are
 // added in a random order.
 func build(n int) *skiplist.Skiplist[int] {
     sl := skiplist.New(compare)
@@ -31,7 +31,7 @@ func build(n int) *skiplist.Skiplist[int] {
     return sl
 }
 
-// `random` returns a skiplist with `n` random integers.
+// `random` returns a skip list with `n` random integers.
 func random(n int) *skiplist.Skiplist[int] {
     sl := skiplist.New(compare)
     sl.SetPrealloc(6)
@@ -42,12 +42,12 @@ func random(n int) *skiplist.Skiplist[int] {
 }
 
 
-// Skiplist sizes for the benchmarks.
+// Skip list sizes for the benchmarks.
 var sizes []int = []int{100, 1000, 10000}
 
 var global *skiplist.Skiplist[int]
 
-// Benchmark the insertion of a value into a skiplist.
+// Benchmark the insertion of a value into a skip list.
 func BenchmarkSkiplist_Add(b *testing.B) {
     //skiplist.DefaultSeed1 = 143
     //skiplist.DefaultSeed2 = 34
@@ -55,11 +55,11 @@ func BenchmarkSkiplist_Add(b *testing.B) {
         b.Run(fmt.Sprintf("%d", size), func(b *testing.B) {
             b.StopTimer()
             b.ReportAllocs()
-            // Generate a random skiplist containing `size` values.
+            // Generate a random skip list containing `size` values.
             global = random(size)
             for i := 0; i < b.N; i++ {
                 var value int
-                // Find a value that is not in the skiplist.
+                // Find a value that is not in the skip list.
                 for {
                     value = rand.Int()
                     if global.Lookup(value) == nil {
@@ -70,14 +70,14 @@ func BenchmarkSkiplist_Add(b *testing.B) {
                 global.Add(value)
                 b.StopTimer()
                 // Remove the value again, since we want to benchmark the
-                // insertion of a value into a skiplist of a fixed size.
+                // insertion of a value into a skip list of a fixed size.
                 global.Remove(global.Lookup(value))
             }
         })
     }
 }
 
-// Benchmark the deletion of an existing value in a skiplist.
+// Benchmark the deletion of an existing value in a skip list.
 func BenchmarkSkiplist_Remove(b *testing.B) {
     for _, size := range sizes {
         b.Run(fmt.Sprintf("%d", size), func(b *testing.B) {
@@ -104,7 +104,7 @@ func BenchmarkSkiplist_Remove(b *testing.B) {
     }
 }
 
-// Benchmark the lookup of an existing value in a skiplist.
+// Benchmark the lookup of an existing value in a skip list.
 func BenchmarkTree_Lookup(b *testing.B) {
     for _, size := range sizes {
         b.Run(fmt.Sprintf("%d", size), func(b *testing.B) {
@@ -135,6 +135,7 @@ func BenchmarkTree_Lookup(b *testing.B) {
 }
 
 
+// Benchmark iterating through the elements of a skip list.
 func BenchmarkIterators(b *testing.B) {
     var sum int
 
@@ -172,6 +173,24 @@ func BenchmarkIterators(b *testing.B) {
                 for val := range sl.Ascend {
                     sum += val
                 }
+            }
+        })
+    }
+
+    // Using functions to iterate through the list (slower, similar to range
+    // iterators),
+    for _, size := range sizes {
+        b.Run(fmt.Sprintf("%d func", size), func(b *testing.B) {
+            b.StopTimer()
+            b.ReportAllocs()
+            perm := rand.Perm(size)
+            sl := skiplist.New(compare)
+            for _, v := range perm {
+                sl.Add(v)
+            }
+            b.StartTimer()
+            for i := 0; i < b.N; i++ {
+                sl.WalkAscend(func(val int) { sum += val })
             }
         })
     }
