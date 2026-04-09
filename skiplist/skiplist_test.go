@@ -278,4 +278,22 @@ func TestRemove(t *testing.T) {
     }
 }
 
+func TestReset(t *testing.T) {
+    l := New[kvpair](cmp)
+    l.Add(kvpair{0, "foo"})
+    l.Add(kvpair{2, "goo"})
+    l.Add(kvpair{5, "baz"})
+    l.Add(kvpair{1, "moo"})
+    l.Add(kvpair{8, "hoo"})
+    l.Add(kvpair{7, "bat"})
+    l.Add(kvpair{3, "bar"})
+
+    l.Reset()
+    if l.Len() != 0 {
+        t.Errorf("skip list should be empty (%d): %s", l.Len(), l)
+    }
+    if e := l.Lookup(kvpair{5, "baz"}); e != nil {
+        t.Errorf("expected not find element 5 in skip list")
+    }
+}
 
