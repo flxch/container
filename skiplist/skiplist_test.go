@@ -1,8 +1,39 @@
 package skiplist
 
 import (
+    "fmt"
     "testing"
 )
+
+
+func TestElementHeight(t *testing.T) {
+    N := 100000
+    list := New[int](func(x, y int) int { return x - y })
+    list.SetSeed(2, 3)
+    list.max = 16
+
+    heights := make([]int, list.max)
+    for i := 0; i < N; i++ {
+        h := list.newElementHeight()
+        heights[h - 1]++
+    }
+
+    for i := 0; i < list.max - 1; i++ {
+        if float64(heights[i]) > 2.35 * float64(heights[i + 1]) {
+            t.Errorf("too many nodes of height %d (%d) compared to %d (%d)", i, heights[i], i+1, heights[i+1])
+        }
+        if float64(heights[i]) < 1.65 * float64(heights[i + 1]) {
+            t.Errorf("too few nodes of height %d (%d) compared to %d (%d)", i, heights[i], i+1, heights[i+1])
+        }
+    }
+
+    s := ""
+    for h, c := range heights {
+        s += fmt.Sprintf("\nheight[%d] = #%d ", h, c)
+    }
+    t.Logf("node heights: %s", s)
+}
+
 
 
 // `ordering` checks the order of the keys at height `h` in the skip list `l`.
@@ -246,28 +277,4 @@ func TestRemove(t *testing.T) {
     }
 }
 
-/*
-func _TestElementHeight(t *testing.T) {
-    list := New[kvpair](less)
-    N := 100000
-    heights := make([]int, defaultMaxHeight)
-    for i := 0; i < N; i++ {
-        h := list.newElementHeight()
-        heights[h - 1]++
-    }
-    for i := 0; i < defaultMaxHeight - 1; i++ {
-        if float64(heights[i]) > 2.35 * float64(heights[i + 1]) {
-            t.Errorf("too many nodes of height %d (%d) compared to %d (%d)", i, heights[i], i+1, heights[i+1])
-        }
-        if float64(heights[i]) < 1.65 * float64(heights[i + 1]) {
-            t.Errorf("too few nodes of height %d (%d) compared to %d (%d)", i, heights[i], i+1, heights[i+1])
-        }
-    }
-    s := ""
-    for h, c := range heights {
-        s += fmt.Sprintf("(%d, %d) ", h, c)
-    }
-    t.Logf("node heights: %s\n", s)
-}
-*/
 
