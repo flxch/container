@@ -45,3 +45,22 @@ func (l *Skiplist[Data]) MarshalJSON() ([]byte, error) {
     return bs, err
 
 }
+
+// `UnmarshalJSON` modifies the skip list `l` into the skip list that contains
+// the JSON elements of `data`.  The JSON object must be a list.  Its elements
+// do not need to be ordered.
+func (l *Skiplist[Data]) UnmarshalJSON(data []byte) error {
+    // Unmarshal data first into a Data slice.  Not very efficient but simple to
+    // implement.
+    var ds []Data
+    if err := json.Unmarshal(data, &ds); err != nil {
+        return err
+    }
+
+    // Add slice elements to the empty skip list.
+    l.Reset()
+    for _, d := range ds {
+        l.Add(d)
+    }
+    return nil
+}

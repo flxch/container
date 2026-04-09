@@ -55,10 +55,11 @@ func (l *Skiplist[Data]) Init(cmp func(Data, Data) int) *Skiplist[Data] {
     return l
 }
 
-// `Reset` removes all elements from the skip list `l`.
-// NOTE: Elements still point to l. We could run trough them and set the owner
-// to nil. However, this would be an expensive operation if the skip list is
-// long.
+// `Reset` removes all elements from the skip list `l`.  NOTE: Elements still
+// point to l. We could run trough them and set the owner to nil.  However, this
+// would be an expensive operation if the skip list is long.  Furthermore, the
+// elements are linked to each other.  This might lead to a memory leak, as all
+// elements are not garbage collected.
 func (l *Skiplist[Data]) Reset() {
     l.len = 0
     l.max = 0
