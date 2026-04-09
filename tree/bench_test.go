@@ -189,7 +189,7 @@ func BenchmarkIterate(b *testing.B) {
                 global = random(size)
                 resultIterate = 0
                 b.StartTimer()
-                global.Ascend(func(_ int) { resultIterate++ })
+                global.WalkAscend(func(_ int) { resultIterate++ })
                 b.StopTimer()
                 if resultIterate != size {
                     b.Errorf("wrong number of visited nodes")
@@ -209,7 +209,7 @@ func BenchmarkIterateGeq(b *testing.B) {
                 global = random(size)
                 resultIterate = 0
                 b.StartTimer()
-                global.AscendGeq(0, func(_ int) bool { resultIterate++; return true })
+                global.WalkAscendGeq(0, func(_ int) bool { resultIterate++; return true })
                 b.StopTimer()
                 if resultIterate != size {
                     b.Errorf("wrong number of visited nodes")

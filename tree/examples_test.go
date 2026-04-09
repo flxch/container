@@ -27,7 +27,7 @@ func ExampleTree_Add() {
     t.Add(20)
 
     // Print the elements in ascending order.
-    t.Ascend(func(elem int) { fmt.Println(elem) })
+    t.WalkAscend(func(elem int) { fmt.Println(elem) })
 
     // Output:
     // 10
@@ -35,7 +35,7 @@ func ExampleTree_Add() {
 }
 
 // `ExampleTree_WalkAscend` demonstrates the range iterators for trees.
-func ExampleTree_WalkAscend() {
+func ExampleTree_Ascend() {
     // Create an integer tree.
     t := tree.New(func(k, l int) int {
         switch {
@@ -54,7 +54,7 @@ func ExampleTree_WalkAscend() {
     t.Add(0)
 
     // Walk through the tree in ascending order.
-    for elem := range t.WalkAscend {
+    for elem := range t.Ascend {
         fmt.Println(elem)
     }
 

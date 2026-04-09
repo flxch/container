@@ -45,7 +45,7 @@ func TestAscend(t *testing.T) {
             sl.Add(elem)
         }
         r := []string{}
-        for elem := range sl.WalkAscend {
+        for elem := range sl.Ascend {
             r = append(r, elem)
         }
         // Check.
@@ -64,7 +64,7 @@ func TestDescend(t *testing.T) {
             sl.Add(elem)
         }
         r := []string{}
-        for elem := range sl.WalkDescend {
+        for elem := range sl.Descend {
             r = append(r, elem)
         }
         // Check.
@@ -85,7 +85,7 @@ func TestAscendGeq(t *testing.T) {
             sl.Add(elem)
         }
         r := []string{}
-        for elem := range sl.WalkAscendGeq(tc.pivot) {
+        for elem := range sl.AscendGeq(tc.pivot) {
             r = append(r, elem)
         }
         // Check.
@@ -106,7 +106,7 @@ func TestDescendLeq(t *testing.T) {
             sl.Add(elem)
         }
         r := []string{}
-        for elem := range sl.WalkDescendLeq(tc.pivot) {
+        for elem := range sl.DescendLeq(tc.pivot) {
             r = append(r, elem)
         }
         // Check.
@@ -132,7 +132,7 @@ func TestAscendGreater(t *testing.T) {
             sl.Add(elem)
         }
         r := []string{}
-        for elem := range sl.WalkAscendGreater(tc.pivot) {
+        for elem := range sl.AscendGreater(tc.pivot) {
             r = append(r, elem)
         }
         // Check.
@@ -156,7 +156,7 @@ func TestDescendLess(t *testing.T) {
             sl.Add(elem)
         }
         r := []string{}
-        for elem := range sl.WalkDescendLess(tc.pivot) {
+        for elem := range sl.DescendLess(tc.pivot) {
             r = append(r, elem)
         }
         // Check.

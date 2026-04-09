@@ -17,7 +17,7 @@ func (t *Tree[Data]) String() string {
     var b strings.Builder
     b.WriteByte('[')
 
-    t.Ascend(func(d Data) {
+    t.WalkAscend(func(d Data) {
         if b.Len() > 1 {
             b.WriteString(ElemSep)
         }
@@ -39,7 +39,7 @@ func (t *Tree[Data]) MarshalJSON() ([]byte, error) {
     bs := []byte("[")
 
     var err error
-    t.AscendGeq(min, func(d Data) bool {
+    t.WalkAscendGeq(min, func(d Data) bool {
         if len(bs) > 1 {
             bs = append(bs, ',')
         }

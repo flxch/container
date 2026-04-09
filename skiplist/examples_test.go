@@ -24,7 +24,7 @@ func ExampleSkiplist() {
     // [bar,baz,foo]
 }
 
-func ExampleSkiplist_WalkAscend() {
+func ExampleSkiplist_AscendGeq() {
     sl := skiplist.New[string](strings.Compare)
 
     sl.Add("foo")
@@ -32,7 +32,7 @@ func ExampleSkiplist_WalkAscend() {
     sl.Add("bar")
     sl.Add("baz")
 
-    for elem := range sl.WalkAscendGeq("baz") {
+    for elem := range sl.AscendGeq("baz") {
         fmt.Println(elem)
     }
 

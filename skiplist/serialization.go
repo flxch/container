@@ -27,7 +27,7 @@ func (l *Skiplist[Data]) String() string {
 func (l *Skiplist[Data]) MarshalJSON() ([]byte, error) {
     bs := []byte("[")
     var err error
-    for d := range l.WalkAscend {
+    for d := range l.Ascend {
         if len(bs) > 1 {
             bs = append(bs, ',')
         }

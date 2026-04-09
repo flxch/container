@@ -152,7 +152,7 @@ func TestPartialRemove(t *testing.T) {
         }
     }
     j := 0
-    T.AscendGeq(0, func(item int) bool {
+    T.WalkAscendGeq(0, func(item int) bool {
         switch j {
         case 0:
             if item != 0 {
@@ -176,7 +176,7 @@ func TestDoubleAdd(t *testing.T) {
         T.Add(perm[i])
     }
     j := 0
-    T.AscendGeq(0, func(item int) bool {
+    T.WalkAscendGeq(0, func(item int) bool {
         if item != j/2 {
             t.Fatalf("incorrect order of keys")
         }

@@ -7,7 +7,7 @@ import (
 )
 
 
-func TestAscendGeq(t *testing.T) {
+func TestWalkAscendGeq(t *testing.T) {
     expected := []int{1, 3, 4, 6}
     T := tree.New(compare)
     T.Add(4)
@@ -17,22 +17,22 @@ func TestAscendGeq(t *testing.T) {
     var actual []int
     op := func(elem int) bool { actual = append(actual, elem); return true }
 
-    T.AscendGeq(-1, op)
+    T.WalkAscendGeq(-1, op)
     if !slices.Equal(expected, actual) {
         t.Errorf("wrong result: %v (should be %v)", actual, expected)
     }
     actual = nil
-    T.AscendGeq(3, op)
+    T.WalkAscendGeq(3, op)
     if !slices.Equal(expected[1:], actual) {
         t.Errorf("wrong result: %v (should be %v)", actual, expected[1:])
     }
     actual = nil
-    T.AscendGeq(2, op)
+    T.WalkAscendGeq(2, op)
     if !slices.Equal(expected[1:], actual) {
         t.Errorf("wrong result: %v (should be %v)", actual, expected[1:])
     }
     actual = nil
-    T.AscendGeq(2, func(elem int) bool {
+    T.WalkAscendGeq(2, func(elem int) bool {
         actual = append(actual, elem)
         return elem != 4
     })
@@ -41,7 +41,7 @@ func TestAscendGeq(t *testing.T) {
     }
 }
 
-func TestDescendLeq(t *testing.T) {
+func TestWalkDescendLeq(t *testing.T) {
     expected := []int{6, 4, 3, 1}
     T := tree.New(compare)
     T.Add(4)
@@ -51,22 +51,22 @@ func TestDescendLeq(t *testing.T) {
     var actual []int
     op := func(elem int) bool { actual = append(actual, elem); return true }
 
-    T.DescendLeq(10, op)
+    T.WalkDescendLeq(10, op)
     if !slices.Equal(expected, actual) {
         t.Errorf("wrong result: %v (should be %v)", actual, expected)
     }
     actual = nil
-    T.DescendLeq(4, op)
+    T.WalkDescendLeq(4, op)
     if !slices.Equal(expected[1:], actual) {
         t.Errorf("wrong result: %v (should be %v)", actual, expected[1:])
     }
     actual = nil
-    T.DescendLeq(5, op)
+    T.WalkDescendLeq(5, op)
     if !slices.Equal(expected[1:], actual) {
         t.Errorf("wrong result: %v (should be %v)", actual, expected[1:])
     }
     actual = nil
-    T.DescendLeq(5, func(elem int) bool {
+    T.WalkDescendLeq(5, func(elem int) bool {
         actual = append(actual, elem)
         return elem != 3
     })
@@ -79,7 +79,7 @@ func TestDescendLeq(t *testing.T) {
 func TestOrder(t *testing.T) {
     T := build(1000)
     j := 0
-    T.AscendGeq(0, func(elem int) bool {
+    T.WalkAscendGeq(0, func(elem int) bool {
         if elem != j {
             t.Fatalf("wrong order")
         }
@@ -95,7 +95,7 @@ func TestReverseOrder(t *testing.T) {
         T.Add(n - i)
     }
     i := 0
-    T.AscendGeq(0, func(elem int) bool {
+    T.WalkAscendGeq(0, func(elem int) bool {
         i++
         if elem != i {
             t.Errorf("wrong order: got %d, expect %d", elem, i)
@@ -104,10 +104,11 @@ func TestReverseOrder(t *testing.T) {
     })
 }
 
-func TestEmptyWalkAscend(t *testing.T) {
+
+func TestEmptyAscend(t *testing.T) {
     T := tree.New(compare)
     ds := make([]int, 0, 10)
-    for d := range T.WalkAscend {
+    for d := range T.Ascend {
         t.Logf("%v ", d)
         ds = append(ds, d)
     }
@@ -116,10 +117,10 @@ func TestEmptyWalkAscend(t *testing.T) {
     }
 }
 
-func TestNonemptyWalkAscend(t *testing.T) {
+func TestNonemptyAscend(t *testing.T) {
     T := build(10)
     ds := make([]int, 0, 10)
-    for d := range T.WalkAscend {
+    for d := range T.Ascend {
         t.Logf("%v ", d)
         ds = append(ds, d)
     }
@@ -128,10 +129,10 @@ func TestNonemptyWalkAscend(t *testing.T) {
     }
 }
 
-func TestEmptyWalkDescend(t *testing.T) {
+func TestEmptyDescend(t *testing.T) {
     T := tree.New(compare)
     ds := make([]int, 0, 10)
-    for d := range T.WalkDescend {
+    for d := range T.Descend {
         t.Logf("%v ", d)
         ds = append(ds, d)
     }
@@ -140,10 +141,10 @@ func TestEmptyWalkDescend(t *testing.T) {
     }
 }
 
-func TestNonemptyWalkDescend(t *testing.T) {
+func TestNonemptyDescend(t *testing.T) {
     T := build(10)
     ds := make([]int, 0, 10)
-    for d := range T.WalkDescend {
+    for d := range T.Descend {
         t.Logf("%v ", d)
         ds = append(ds, d)
     }

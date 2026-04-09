@@ -5,9 +5,7 @@
 package skiplist
 
 // TODOs
-// * Change API (avoid exporting the element type, unify with tree package).
-// * Rename iterators, e.g. WalkDescend -> Descend (if doing this, also rename
-//   the iterators in the tree package).
+// * Change API (avoid exporting the element type, unify with tree package). (?)
 // * Allow skip lists to contain equal data values (insert versus add). (?)
 // * Add examples (for various skip list methods and the iterators).
 // * Add more tests.

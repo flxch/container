@@ -169,7 +169,7 @@ func BenchmarkIterators(b *testing.B) {
             }
             b.StartTimer()
             for i := 0; i < b.N; i++ {
-                for val := range sl.WalkAscend {
+                for val := range sl.Ascend {
                     sum += val
                 }
             }
