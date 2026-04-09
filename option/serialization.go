@@ -6,7 +6,7 @@ import (
 )
 
 
-// `String` returns the string version of the option `v`.
+// `String` returns the string representation of the option `v`.
 func (v Option[T]) String() string {
     if v.IsNone() {
         return "None"
