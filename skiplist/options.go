@@ -18,6 +18,8 @@ var (
     // elements, a larger maximal height might work better, either by setting
     // `DefaultMaxHeight` to another value or using the methoid `SetHeight` to
     // change a skip list's maximal element height.
+    // If `DefaultMaxHeight` is 1 then the skip lists degenerate to
+    // doubly-linked lists.
     DefaultMaxHeight int = 32
 
     // As the height of internal elements are randomly chosen, one can set the

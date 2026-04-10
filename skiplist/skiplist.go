@@ -150,20 +150,27 @@ func (l *Skiplist[Data]) Height() int {
     return len(l.heights)
 }
 
-// `SetHeight` changes the maximal height of elements in the skip list `l`.
+// `SetHeight` changes the maximal height `h` of elements in the skip list `l`.
+// If `h == 1`, the skip list degenerates to a doubly-linked list.
 func (l *Skiplist[Data]) SetHeight(h int) {
     if h >= 1 && h <= 64 {
         d := h - len(l.heights)
         switch {
-        case d < 0: // Cut elements with height above h.
+        case d < 0: // Cut elements with height above h to h.
             e := l.root.neighbors[h].next
             for e != &l.root {
+                // Update height count.
+                for k := h; k < len(e.neighbors); k++ {
+                    l.heights[h] += l.heights[k]
+                    l.heights[k] = 0
+                }
+                // Cut height.
                 f := e.neighbors[h].next
-                e.neighbors = e.neighbors[0:h]
+                e.neighbors = e.neighbors[:h]
                 e = f
             }
-            l.root.neighbors = l.root.neighbors[0:h]
-            l.heights = l.heights[0:h]
+            l.root.neighbors = l.root.neighbors[:h]
+            l.heights = l.heights[:h]
             if l.max > h {
                 l.max = h
             }
@@ -175,6 +182,93 @@ func (l *Skiplist[Data]) SetHeight(h int) {
             }
             l.heights = append(l.heights, make([]int, d)...)
         }
+    }
+}
+
+
+// `resize` returns a slice of length `n`.  The first `min(n, len(s))` elements
+// of slice s are the first `min(n, len(s))` of the returned slice.
+func resize[S ~[]E, E any](s []E, n int) []E {
+    if n > cap(s) {
+        // Make a big enough copy of s.
+        t := make([]E, n)
+        copy(t, s)
+        return t
+    }
+    // Capacity of s big enough, just reset the length of s.
+    t := s[:n]
+    for i := len(s);  i < n; i++ {
+        // Zero values to avoid memory leaks.
+        var z E
+        t[i] = z
+    }
+    return t
+}
+
+func nextPow2(n int) int {
+    if n <= 1 {
+        return 1
+    }
+    return 1 << bits.Len(uint(n - 1))
+}
+
+func prevPow2(n int) int {
+    if n <= 1 {
+        return 0 // no power of 2 < n
+    }
+    return 1 << (bits.Len(uint(n - 1)) - 1)
+}
+
+// `ResetHeights` sets the heights of the elements optimally in the skip list
+// `l` new.  Note that the optimality is not preserved when adding or removing
+// elements from the skip list.  However, when there are many lookups and few
+// removals or insertions, optimizing the heights might make sense.
+// TODO: Benchmarks should confirm this.
+func (l *Skiplist[Data]) ResetHeights() {
+    if l.Len() == 0 {
+        // Nothing to do for the empty skip list.
+        return
+    }
+
+    p := make([]*Element[Data], l.Height())
+    for k := 0; k < l.Height(); k++ {
+        p[k] = &l.root
+        l.heights[k] = 0
+    }
+    l.max = 1
+
+    mid := prevPow2(l.Len()) / 2
+    count, n := 0, 0
+    for elem := l.root.neighbors[0].next; elem != &l.root; elem = elem.neighbors[0].next {
+        var h int
+        if count <= mid {
+            n++
+            h = bits.TrailingZeros(uint(n)) + 1
+        } else if count > l.Len() - mid {
+            n--
+            h = bits.TrailingZeros(uint(n - 1)) + 1
+        } else {
+            h = l.newElementHeight()
+        }
+        count++
+        elem.neighbors = resize[[]neighbors[Data], neighbors[Data]](elem.neighbors, h)
+
+        // Link element neighbors (previous).
+        for k := 1; k < h; k++ {
+            p[k].neighbors[k].next = elem
+            elem.neighbors[k].prev = p[k]
+            p[k] = elem
+        }
+
+        // Update skip list data.
+        l.heights[h - 1]++
+        l.max = max(l.max, h)
+    }
+
+    // Complete links of last element.
+    for k := 1; k < l.Height(); k++ {
+        p[k].neighbors[k].next = &l.root
+        l.root.neighbors[k].prev = p[k]
     }
 }
 
@@ -217,9 +311,7 @@ func (l *Skiplist[Data]) Add(val Data) *Element[Data] {
         e.list = l
         l.len++
         l.heights[e.height() - 1]++
-        //if e.height() > l.max && l.max < len(l.heights) {
-        //    l.max = e.height()
-        //}
+        l.max = max(l.max, e.height())
     }
     return e
 }
@@ -229,11 +321,12 @@ func (l *Skiplist[Data]) Add(val Data) *Element[Data] {
 // value.  `e` must not be nil.
 func (l *Skiplist[Data]) Remove(e *Element[Data]) Data {
     if e.list == l {
-        l.heights[e.height() - 1]--
-        if e.height() == l.max && l.heights[e.height() - 1] == 0 {
-            l.max--
-        }
         l.len--
+        l.heights[e.height() - 1]--
+        if h := e.height(); h == l.max {
+            for ; l.heights[h - 1] == 0 && h >= 0; h-- { }
+            l.max = h
+        }
         for h := e.height() - 1; h >= 0; h-- {
             e.neighbors[h].prev.neighbors[h].next = e.neighbors[h].next
             e.neighbors[h].next.neighbors[h].prev = e.neighbors[h].prev
@@ -242,6 +335,19 @@ func (l *Skiplist[Data]) Remove(e *Element[Data]) Data {
         e.list = nil
     }
     return e.Value
+}
+
+
+// `IsSorted` returns true if the elements in the skip list `l` are ordered
+// ascendingly.
+func (l *Skiplist[Data]) IsSorted() bool {
+    var p, q *Element[Data]
+    for p, q = nil, l.Front(); q != nil; p, q = q, p.Next() {
+        if p != nil && l.cmp(p.Value, q.Value) >= 0 {
+            return false
+        }
+    }
+    return true
 }
 
 

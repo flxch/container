@@ -1,10 +1,32 @@
 package skiplist
 
 import (
+    "math/bits"
     "fmt"
     "math/rand/v2"
     "testing"
 )
+
+
+func TestOptHeight(t *testing.T) {
+    N := 33
+    mid := prevPow2(N) / 2
+    count := 0
+    for i := 0; i < N; i++ {
+        var height int
+        if i <= mid {
+            count++
+            height = bits.TrailingZeros(uint(count)) + 1
+        } else if i > N - mid {
+            count--
+            height = bits.TrailingZeros(uint(count-1)) + 1
+        } else {
+            height = 2 + rand.IntN(6)
+        }
+
+        t.Logf("%d: %d (count %d)", i, height, count)
+    }
+}
 
 
 // Test whether the element height is well distributed.
@@ -68,14 +90,41 @@ func (l *Skiplist[Data]) linking(h int) bool {
     return true
 }
 
-// `sanity` performs a sanity check for the skip list `l`, i.e., it checks the
-// key ordering and next/prev pointers at evey height.
-func (l *Skiplist[Data]) sanity() bool {
-    ok := true
-    for h := 0; ok && h < l.Height(); h++ {
-        ok = l.ordering(h) && l.linking(h)
+// `heightcount` sums the number of elements of height 'h' in the skip list `l`.
+func (l *Skiplist[Data]) heightcount(h int) int {
+    c := 0
+    for e := l.root.neighbors[0].next; e != &l.root; e = e.neighbors[0].next {
+        if len(e.neighbors) - 1 == h {
+            c++
+        }
     }
-    return ok
+    return c
+}
+
+// `sanity` performs a sanity check for the skip list `l`, e.g., it checks the
+// element ordering and next/prev pointers at evey height.
+func (l *Skiplist[Data]) sanity() error {
+    max := 0
+    for h := 0; h < l.Height(); h++ {
+        if !l.ordering(h) {
+            return fmt.Errorf("elements in skip list are not correctly ordered at level %d", h)
+        }
+        if !l.linking(h) {
+            return fmt.Errorf("elements in skip list are not correctly linked at level %d", h)
+        }
+
+        count := l.heightcount(h)
+        if count != l.heights[h] {
+            return fmt.Errorf("wrong number of height count (%d!=%d) for level %d", count, l.heights[h], h)
+        }
+        if count > 0 {
+            max = h + 1
+        }
+    }
+    if max != l.max {
+        return fmt.Errorf("wrong maximal height %d, not %d", l.max, max)
+    }
+    return nil
 }
 
 
@@ -138,8 +187,8 @@ func cmp(x, y kvpair) int {
 
 func TestNew(t *testing.T) {
     l := New[kvpair](cmp)
-    if !l.sanity() {
-        t.Errorf("ordering or pointers are wrong in skip list: %s", l)
+    if err := l.sanity(); err != nil {
+        t.Errorf("%v: %s", err, l)
     }
     if l.Len() != 0 {
         t.Errorf("wrong number (%d) of elements in skip list: %s", l.Len(), l)
@@ -155,8 +204,8 @@ func TestNew(t *testing.T) {
 func TestAdd1(t *testing.T) {
     l := New[kvpair](cmp)
     l.Add(kvpair{0, "foo"})
-    if !l.sanity() {
-        t.Errorf("ordering or pointers are wrong in skip list: %s", l)
+    if err := l.sanity(); err != nil {
+        t.Errorf("%v: %s", err, l)
     }
     if l.Len() != 1 {
         t.Errorf("wrong number (%d) of elements in skip list: %s", l.Len(), l)
@@ -178,8 +227,8 @@ func TestAdd(t *testing.T) {
     l.Add(kvpair{0, "foo"})
     l.Add(kvpair{2, "goo"})
     l.Add(kvpair{1, "moo"})
-    if !l.sanity() {
-        t.Errorf("wrong order in skip list: %s", l)
+    if err := l.sanity(); err != nil {
+        t.Errorf("%v: %s", err, l)
     }
     if l.Len() != 3 {
         t.Errorf("wrong number (%d) of elements in skip list: %s", l.Len(), l)
@@ -208,8 +257,8 @@ func TestAddEqual(t *testing.T) {
     l.Add(kvpair{2, "XYZ"})
     t.Logf("%s", l)
 
-    if !l.sanity() {
-        t.Errorf("wrong order in skip list: %s", l)
+    if err := l.sanity(); err != nil {
+        t.Errorf("%v: %s", err, l)
     }
     if l.Len() != 7 {
         t.Errorf("wrong number (%d) of elements in skip list: %s", l.Len(), l)
@@ -268,14 +317,14 @@ func TestRemove(t *testing.T) {
         t.Errorf("wrong key (%d) or value (%s) of removed element from skip list: %s", d.key, d.val, l)
     } else if l.Len() != 6 {
         t.Errorf("wrong number (%d) of elements in skip list: %s", l.Len(), l)
-    } else if !l.sanity() {
-        t.Errorf("wrong order in skip list: %s", l)
+    } else if err := l.sanity(); err != nil {
+        t.Errorf("%v: %s", err, l)
     }
     l.Remove(e)
     if l.Len() != 6 {
         t.Errorf("wrong number (%d) of elements in skip list: %s", l.Len(), l)
-    } else if !l.sanity() {
-        t.Errorf("wrong order in skip list: %s", l)
+    } else if err := l.sanity(); err != nil {
+        t.Errorf("%v: %s", err, l)
     }
 }
 
@@ -307,9 +356,9 @@ func TestSetHeight(t *testing.T) {
         l.Add(v)
     }
     t.Logf("%v", l)
-    t.Logf("height count: %v", l.heights)
-    if !l.sanity() {
-        t.Errorf("wrong order in skip list: %s", l)
+    t.Logf("max height: %d, height count: %v", l.max, l.heights)
+    if err := l.sanity(); err != nil {
+        t.Errorf("%v: %s", err, l)
     }
     if l.Len() != 100 {
         t.Errorf("wrong length %d of skip list", l.Len())
@@ -320,9 +369,9 @@ func TestSetHeight(t *testing.T) {
         l.Add(v)
     }
     t.Logf("%v", l)
-    t.Logf("height count: %v", l.heights)
-    if !l.sanity() {
-        t.Errorf("wrong order in skip list: %s", l)
+    t.Logf("max height: %d, height count: %v", l.max, l.heights)
+    if err := l.sanity(); err != nil {
+        t.Errorf("%v: %s", err, l)
     }
     if l.Len() != 200 {
         t.Errorf("wrong length %d of skip list", l.Len())
@@ -333,9 +382,9 @@ func TestSetHeight(t *testing.T) {
         l.Add(v)
     }
     t.Logf("%v", l)
-    t.Logf("height count: %v", l.heights)
-    if !l.sanity() {
-        t.Errorf("wrong order in skip list: %s", l)
+    t.Logf("max height: %d, height count: %v", l.max, l.heights)
+    if err := l.sanity(); err != nil {
+        t.Errorf("%v: %s", err, l)
     }
     if l.Len() != 300 {
         t.Errorf("wrong length %d of skip list", l.Len())
@@ -349,3 +398,20 @@ func TestSetHeight(t *testing.T) {
     }
 }
 
+func TestResetHeights(t *testing.T) {
+    l := New[int](func(x, y int) int { return x - y })
+    elems := rand.Perm(200)
+    for _, v := range elems[:100] {
+        l.Add(v)
+    }
+    t.Logf("max height: %d, height count: %v", l.max, l.heights)
+    l.SetHeight(8)
+    for _, v := range elems[100:200] {
+        l.Add(v)
+    }
+    l.ResetHeights()
+    t.Logf("max height: %d, height count: %v", l.max, l.heights)
+    if err := l.sanity(); err != nil {
+        t.Errorf("%v: %s", err, l)
+    }
+}

@@ -39,6 +39,43 @@ func (e *Element[Data]) Prev() *Element[Data] {
 }
 
 
+// `InsertBefore` inserts the value `val` as a new element right before the
+// element `e` in the skip list of `e`.  It is not checked whether the values
+// are correctly ordered.
+func (e *Element[Data]) InsertBefore(val Data) {
+    e = e.list.root.neighbors[0].prev
+    e.insert(&Element[Data]{
+        list:      e.list,
+        neighbors: make([]neighbors[Data], 1),
+        Value:     val,
+    })
+}
+
+// `InsertBefore` inserts the value `val` as a new element right after the
+// element `e` in the skip list of `e`.  It is not checked whether the values
+// are correctly ordered.
+func (e *Element[Data]) InsertAfter(val Data) {
+    e.insert(&Element[Data]{
+        list:      e.list,
+        neighbors: make([]neighbors[Data], 1),
+        Value:     val,
+    })
+}
+
+func (e *Element[Data]) insert(f *Element[Data]) {
+    // Update skip list data.
+    e.list.len++
+    e.list.heights[0]++
+    e.list.max = max(e.list.max, 1)
+    // Set links.
+    t := e.neighbors[0].next
+    e.neighbors[0].next = f
+    f.neighbors[0].prev = e
+    t.neighbors[0].prev = f
+    f.neighbors[0].next = t
+}
+
+
 // `height` returns the height of the element `e`.
 func (e *Element[Data]) height() int {
     return len(e.neighbors)

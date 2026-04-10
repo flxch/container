@@ -83,7 +83,7 @@ func BenchmarkSkiplist_Remove(b *testing.B) {
         b.Run(fmt.Sprintf("%d", size), func(b *testing.B) {
             b.StopTimer()
             b.ReportAllocs()
-            // Generate a random tree containing `size` values.
+            // Generate a random skip list containing `size` values.
             global = random(size)
             for i := 0; i < b.N; i++ {
                 // Insert the value first, since we want to benchmark the
@@ -105,12 +105,12 @@ func BenchmarkSkiplist_Remove(b *testing.B) {
 }
 
 // Benchmark the lookup of an existing value in a skip list.
-func BenchmarkTree_Lookup(b *testing.B) {
+func BenchmarkSkiplist_Lookup(b *testing.B) {
     for _, size := range sizes {
         b.Run(fmt.Sprintf("%d", size), func(b *testing.B) {
             b.StopTimer()
             b.ReportAllocs()
-            // Generate a random tree containing `size` values.
+            // Generate a random skip list containing `size` values.
             global = random(size)
             for i := 0; i < b.N; i++ {
                 // Insert the value first, since we want to benchmark the lookup
@@ -127,7 +127,35 @@ func BenchmarkTree_Lookup(b *testing.B) {
                 elem := global.Lookup(value)
                 b.StopTimer()
                 // Remove the value again, since we want to benchmark the lookup
-                // of a value for a tree of a fixed size.
+                // of a value for a skip list of a fixed size.
+                global.Remove(elem)
+            }
+        })
+    }
+
+    for _, size := range sizes {
+        b.Run(fmt.Sprintf("%d reset", size), func(b *testing.B) {
+            b.StopTimer()
+            b.ReportAllocs()
+            // Generate a random skip list containing `size` values.
+            global = random(size)
+            global.ResetHeights()
+            for i := 0; i < b.N; i++ {
+                // Insert the value first, since we want to benchmark the lookup
+                // of an existing value.
+                var value int
+                for {
+                    value = rand.Int()
+                    if global.Lookup(value) == nil {
+                        global.Add(value)
+                        break
+                    }
+                }
+                b.StartTimer()
+                elem := global.Lookup(value)
+                b.StopTimer()
+                // Remove the value again, since we want to benchmark the lookup
+                // of a value for a skip list of a fixed size.
                 global.Remove(elem)
             }
         })
