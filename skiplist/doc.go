@@ -12,4 +12,4 @@ package skiplist
 // * Add pool for elements (optional when creating skip list).  However, we
 //   should first do some profiling to see we gain a speedup with a pool.  Note
 //   that we only allocate memory when adding a new element to a skip list.
-
+// * Compare with other skip list packages, in particular, compare benchmarks.

@@ -19,7 +19,7 @@ type Skiplist[Data any] struct {
     len      int
     // Height count of the elements in the skip list
     heights  []int
-    // Maximal height an element can have in the skip list.
+    // Maximal height an element that can have in the skip list.
     max      int
     // Random number generator for setting the height of an element.
     rand     *rand.Rand
@@ -223,7 +223,8 @@ func prevPow2(n int) int {
 // `l` new.  Note that the optimality is not preserved when adding or removing
 // elements from the skip list.  However, when there are many lookups and few
 // removals or insertions, optimizing the heights might make sense.
-// The benchmarks do not show a significant performance improcements.
+// The benchmarks do not show a significant performance improcements but they
+// show an improvement.
 func (l *Skiplist[Data]) ResetHeights() {
     if l.Len() == 0 {
         // Nothing to do for the empty skip list.
@@ -247,8 +248,12 @@ func (l *Skiplist[Data]) ResetHeights() {
         } else if count > l.Len() - mid {
             n--
             h = bits.TrailingZeros(uint(n - 1)) + 1
+        } else if count % 2 != 0 {
+            h = min(l.max, l.newElementHeight() + 1)
         } else {
-            h = l.newElementHeight()
+            // Elements at the even positions 0, 2, 4, 6, ... should always have
+            // height 1.
+            h = 1
         }
         count++
         elem.neighbors = resize[[]neighbors[Data], neighbors[Data]](elem.neighbors, h)
