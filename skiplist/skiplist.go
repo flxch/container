@@ -19,7 +19,7 @@ type Skiplist[Data any] struct {
     len      int
     // Height count of the elements in the skip list
     heights  []int
-    // Current maximal height of an element in the skip list.
+    // Maximal height an element can have in the skip list.
     max      int
     // Random number generator for setting the height of an element.
     rand     *rand.Rand
@@ -161,7 +161,7 @@ func (l *Skiplist[Data]) SetHeight(h int) {
             for e != &l.root {
                 // Update height count.
                 for k := h; k < len(e.neighbors); k++ {
-                    l.heights[h] += l.heights[k]
+                    l.heights[h - 1] += l.heights[k]
                     l.heights[k] = 0
                 }
                 // Cut height.
@@ -171,9 +171,7 @@ func (l *Skiplist[Data]) SetHeight(h int) {
             }
             l.root.neighbors = l.root.neighbors[:h]
             l.heights = l.heights[:h]
-            if l.max > h {
-                l.max = h
-            }
+            l.max = min(l.max, h)
         case d > 0: // Extend root to height h.
             l.root.neighbors = append(l.root.neighbors, make([]neighbors[Data], d)...)
             for k := h - 1; k >= len(l.heights); k-- {
@@ -205,6 +203,7 @@ func resize[S ~[]E, E any](s []E, n int) []E {
     return t
 }
 
+// `nextPow2` returns the smallest power of 2 that is larger than `n`.
 func nextPow2(n int) int {
     if n <= 1 {
         return 1
@@ -212,6 +211,7 @@ func nextPow2(n int) int {
     return 1 << bits.Len(uint(n - 1))
 }
 
+// `prevPow2` returns the largest power of 2 that is smaller than `n`.
 func prevPow2(n int) int {
     if n <= 1 {
         return 0 // no power of 2 < n
@@ -223,7 +223,7 @@ func prevPow2(n int) int {
 // `l` new.  Note that the optimality is not preserved when adding or removing
 // elements from the skip list.  However, when there are many lookups and few
 // removals or insertions, optimizing the heights might make sense.
-// TODO: Benchmarks should confirm this.
+// The benchmarks do not show a significant performance improcements.
 func (l *Skiplist[Data]) ResetHeights() {
     if l.Len() == 0 {
         // Nothing to do for the empty skip list.
@@ -399,7 +399,8 @@ func (l *Skiplist[Data]) newElementHeight() int {
         return 1 + h
     }
     if l.max == 0 || l.max < len(l.heights) && l.heights[l.max - 1] > 0 {
+        // Increase maximal height of an element if we already have
         l.max++
-    }
+     }
     return 1
 }

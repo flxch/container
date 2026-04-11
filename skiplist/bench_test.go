@@ -43,7 +43,7 @@ func random(n int) *skiplist.Skiplist[int] {
 
 
 // Skip list sizes for the benchmarks.
-var sizes []int = []int{100, 1000, 10000}
+var sizes []int = []int{128, 1024, 16384}
 
 var global *skiplist.Skiplist[int]
 

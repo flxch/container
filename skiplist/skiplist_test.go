@@ -104,7 +104,6 @@ func (l *Skiplist[Data]) heightcount(h int) int {
 // `sanity` performs a sanity check for the skip list `l`, e.g., it checks the
 // element ordering and next/prev pointers at evey height.
 func (l *Skiplist[Data]) sanity() error {
-    max := 0
     for h := 0; h < l.Height(); h++ {
         if !l.ordering(h) {
             return fmt.Errorf("elements in skip list are not correctly ordered at level %d", h)
@@ -115,14 +114,8 @@ func (l *Skiplist[Data]) sanity() error {
 
         count := l.heightcount(h)
         if count != l.heights[h] {
-            return fmt.Errorf("wrong number of height count (%d!=%d) for level %d", count, l.heights[h], h)
+            return fmt.Errorf("wrong number of height count (%d) for level %d: %v", count, h, l.heights)
         }
-        if count > 0 {
-            max = h + 1
-        }
-    }
-    if max != l.max {
-        return fmt.Errorf("wrong maximal height %d, not %d", l.max, max)
     }
     return nil
 }
