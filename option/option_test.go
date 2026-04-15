@@ -131,7 +131,6 @@ func TestOption_Lift(t *testing.T) {
     } else if  option.Equal(d, option.None[int]()) {
         t.Errorf("none should not be equal to none")
     }
-
 }
 
 
