@@ -34,13 +34,6 @@ func (v Option[T]) IsSome() bool {
     return v.some
 }
 
-// `IsZero` returns true if `v` carries a value and this value is zero of the
-// type T.
-//func (v Option[T]) IsZero() bool {
-//    var z T
-//    return v.some && v.value == z
-//}
-
 
 // `Wrap` returns an option of type T with value `v` if `some` is true.
 // Otherwise, `Wrap` returns an option with no value.
@@ -83,8 +76,12 @@ func Equal[T comparable](u, v Option[T]) bool {
     return u.Value() == v.Value()
 }
 
-// `LiftOp` lifts the operation `op` to the operation on Option[T].
+// `LiftOp` lifts the operation `op` to the operation on Option[T].  If `op` is
+// nil, nil is returned.
 func LiftOp[T any](op func(T, T) T) func(Option[T], Option[T]) Option[T] {
+    if op == nil {
+        return nil
+    }
     return func(u, v Option[T]) Option[T] {
         if u.IsNone() || v.IsNone() {
             return None[T]()

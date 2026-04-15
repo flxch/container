@@ -52,7 +52,7 @@ func ExampleOption() {
 
 // Tests.
 
-func TestOptional_String(t *testing.T) {
+func TestOption_String(t *testing.T) {
     if u := option.Some(1); u.String() != "Some(1)" {
         t.Errorf("expected Some(1), not %s", u)
     }
@@ -64,7 +64,7 @@ func TestOptional_String(t *testing.T) {
     }
 }
 
-func TestOptional_Some(t *testing.T) {
+func TestOption_Some(t *testing.T) {
     u := option.Some(1)
 
     if !u.IsSome() {
@@ -82,7 +82,7 @@ func TestOptional_Some(t *testing.T) {
     }
 }
 
-func TestOptional_None(t *testing.T) {
+func TestOption_None(t *testing.T) {
     u := option.None[int]()
 
     if !u.IsNone() {
@@ -105,7 +105,7 @@ func TestOptional_None(t *testing.T) {
     u.Value()
 }
 
-func TestOptional_Zero(t *testing.T) {
+func TestOption_Zero(t *testing.T) {
     u := option.Zero[int]()
 
     var n int
@@ -117,3 +117,21 @@ func TestOptional_Zero(t *testing.T) {
         t.Errorf("expected the zero value, not %d", u.Value())
     }
 }
+
+
+func TestOption_Lift(t *testing.T) {
+    div := option.LiftOp(func (n, m int) int { return n / m })
+
+    if d := div(option.Some(8), option.Some(2)); !option.Equal(d, option.Some(4)) {
+        t.Errorf("expected some value (4), not %s", d)
+    }
+
+    if d := div(option.Some(8), option.None[int]()); !d.IsNone() {
+        t.Errorf("expected none, not %s", d)
+    } else if  option.Equal(d, option.None[int]()) {
+        t.Errorf("none should not be equal to none")
+    }
+
+}
+
+
