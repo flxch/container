@@ -43,7 +43,6 @@ func (l *Skiplist[Data]) MarshalJSON() ([]byte, error) {
     }
     bs = append(bs, ']')
     return bs, err
-
 }
 
 // `UnmarshalJSON` modifies the skip list `l` into the skip list that contains
