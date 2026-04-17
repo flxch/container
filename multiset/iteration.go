@@ -18,9 +18,9 @@ func (S *Multiset[A]) Elems() iter.Seq2[A, int] {
     }
 }
 
-// `Sup` returns an iterator for iterating through the support of the
-// multiset `S`.  There is guarantee on the support order.
-func (S *Multiset[A]) Sup() iter.Seq[A] {
+// `Supp` returns an iterator for iterating through the support of the multiset
+// `S`.  There is guarantee on the support order.
+func (S *Multiset[A]) Supp() iter.Seq[A] {
     return func(yield func(A) bool) {
         for e := range S.elems {
             if !yield(e) {

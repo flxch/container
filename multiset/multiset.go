@@ -16,7 +16,9 @@ type Multiset[A comparable] struct {
 }
 
 
-// `New` returns a new empty multiset.
+// `New` returns a new empty multiset with elements of type `A`.  Since the
+// implementation of multisets is based on maps, elements of `A` must be
+// comparable.
 func New[A comparable]() *Multiset[A] {
     return &Multiset[A]{
         elems: make(map[A]int),
@@ -97,6 +99,12 @@ func (S *Multiset[A]) Union(T *Multiset[A]) {
     }
 }
 
+func Union[A comparable](S, T *Multiset[A]) *Multiset[A] {
+    R := S.Clone()
+    R.Union(T)
+    return R
+}
+
 // `Sum` adds the elements of the multiset `T` to the multiset `S`.
 func (S *Multiset[A]) Sum(T *Multiset[A]) {
     for e, m := range T.elems {
@@ -106,8 +114,14 @@ func (S *Multiset[A]) Sum(T *Multiset[A]) {
     }
 }
 
-// `Intersect` intersects the multiset `T` with the multiset `S`.
-func (S *Multiset[A]) Intersect(T *Multiset[A]) {
+func Sum[A comparable](S, T *Multiset[A]) *Multiset[A] {
+    R := S.Clone()
+    R.Sum(T)
+    return R
+}
+
+// `Intersection` intersects the multiset `T` with the multiset `S`.
+func (S *Multiset[A]) Intersection(T *Multiset[A]) {
     for e, n := range S.elems {
         if m := T.Lookup(e); m == 0 {
             delete(S.elems, e)
@@ -121,8 +135,14 @@ func (S *Multiset[A]) Intersect(T *Multiset[A]) {
     }
 }
 
-// `Diff` subtracts the multiset `T` from the multiset `S`.
-func (S *Multiset[A]) Diff(T *Multiset[A]) {
+func Intersection[A comparable](S, T *Multiset[A]) *Multiset[A] {
+    R := S.Clone()
+    R.Intersection(T)
+    return R
+}
+
+// `Difference` subtracts the multiset `T` from the multiset `S`.
+func (S *Multiset[A]) Difference(T *Multiset[A]) {
     for e, n := range S.elems {
         if m := T.Lookup(e); m > n {
             delete(S.elems, e)
@@ -134,10 +154,20 @@ func (S *Multiset[A]) Diff(T *Multiset[A]) {
     }
 }
 
+func Difference[A comparable](S, T *Multiset[A]) *Multiset[A] {
+    R := S.Clone()
+    R.Difference(T)
+    return R
+}
+
 
 // `Equal` returns true if the multiset `S` is equal to the multiset `T`.
 func (S *Multiset[A]) Equal(T *Multiset[A]) bool {
     return S.count == T.count && maps.Equal(S.elems, T.elems)
+}
+
+func Equal[A comparable](S, T *Multiset[A]) bool {
+    return S.Equal(T)
 }
 
 // `Subset` returns true if the multiset `S` is a subset of the multiset `T`.
@@ -154,5 +184,9 @@ func (S *Multiset[A]) Subset(T *Multiset[A]) bool {
     return true
 }
 
+// `Superset` returns true if the multiset `S` is a superset of the multiset `T`.
+func (S *Multiset[A]) Superset(T *Multiset[A]) bool {
+    return T.Subset(S)
+}
 
 
