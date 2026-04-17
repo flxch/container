@@ -9,10 +9,10 @@ import (
 func TestString(t *testing.T) {
     S := multiset.New[string]()
 
-    S.Add("foo")
-    S.Add("foo")
-    S.Add("bar")
-    S.Add("baz")
+    S.Add("foo", 1)
+    S.Add("foo", 1)
+    S.Add("bar", 1)
+    S.Add("baz", 1)
 
     if S.Card() != 4 {
         t.Errorf("wrong cardinality")
@@ -28,10 +28,9 @@ func TestString(t *testing.T) {
 func TestAddRemove(t *testing.T) {
     S := multiset.New[string]()
 
-    S.Add("foo")
-    S.Add("foo")
-    S.Add("bar")
-    S.Add("baz")
+    S.Add("foo", 2)
+    S.Add("bar", 1)
+    S.Add("baz", 1)
     if m := S.Lookup("foo"); m != 2 {
         t.Errorf("expected that foo's multiplicity is 2, not %d", m)
     }
@@ -42,8 +41,8 @@ func TestAddRemove(t *testing.T) {
         t.Errorf("expected that bar's multiplicity is 1, not %d", m)
     }
 
-    S.Remove("foo")
-    S.Remove("baz")
+    S.Remove("foo", 1)
+    S.Remove("baz", 1)
     if m := S.Lookup("foo"); m != 1 {
         t.Errorf("expected that foo's multiplicity is 1, not %d", m)
     }
@@ -65,16 +64,14 @@ func TestAddRemove(t *testing.T) {
 
 func TestUnion(t *testing.T) {
     S := multiset.New[string]()
-    S.Add("foo")
-    S.Add("foo")
-    S.Add("bar")
-    S.Add("baz")
+    S.Add("foo", 2)
+    S.Add("bar", 1)
+    S.Add("baz", 1)
 
     T := multiset.New[string]()
-    T.Add("foo")
-    T.Add("bar")
-    T.Add("bar")
-    T.Add("goo")
+    T.Add("foo", 1)
+    T.Add("bar", 2)
+    T.Add("goo", 1)
 
     S.Union(T)
 
@@ -92,10 +89,9 @@ func TestUnion(t *testing.T) {
 
 func TestIterate(t *testing.T) {
     S := multiset.New[string]()
-    S.Add("foo")
-    S.Add("foo")
-    S.Add("bar")
-    S.Add("baz")
+    S.Add("foo", 2)
+    S.Add("bar", 1)
+    S.Add("baz", 1)
 
     c := 0
     for _, n := range S.Elems() {
@@ -103,6 +99,6 @@ func TestIterate(t *testing.T) {
     }
 
     if c != S.Card() {
-        t.Errorf("expected size %d, not %d", c, S.Len())
+        t.Errorf("expected cardinality %d, not %d", c, S.Len())
     }
 }

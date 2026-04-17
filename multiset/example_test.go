@@ -11,10 +11,9 @@ func ExampleMultiset() {
     S := multiset.New[string]()
 
     // Add some elements to the multiset.
-    S.Add("foo")
-    S.Add("foo")
-    S.Add("bar")
-    S.Add("baz")
+    S.Add("foo", 2)
+    S.Add("bar", 1)
+    S.Add("baz", 1)
 
     // Iterate through the multiset's elements.
     for e, n := range S.Elems() {

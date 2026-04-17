@@ -72,23 +72,23 @@ func (S *Multiset[A]) Lookup(e A) int {
     return n
 }
 
-// `Add` adds the element `e` to the multiset `S`.  Note that if `S` already
-// contains `e`, `e`'s multiplicity in `S` is incremented.
-func (S *Multiset[A]) Add(e A) {
-    S.elems[e] = 1 + S.Lookup(e)
-    S.count++
+// `Add` adds the element `e` to the multiset `S` with multiplicity `m`.  Note
+// that if `S` already contains `e`, `e`'s multiplicity in `S` increases by `m`.
+func (S *Multiset[A]) Add(e A, m int) {
+    S.elems[e] = m + S.Lookup(e)
+    S.count += m
 }
 
-// `Remove` removes the element `e` from the multiset `S`.  That is, `e`'s
-// multiplicity in `S` is decremented, provided that `n > 0`.  Note that if `n
-// == 1`, `e` is completely removed from `S`.
-func (S Multiset[A]) Remove(e A) {
-    if n := S.Lookup(e); n == 1 {
+// `Remove` removes the element `e` from the multiset `S` with multiplicity `m`.
+// That is, `e`'s multiplicity in `S` decreses by `m`, provided that `n > m`.
+// Note that if `m >= n`, `e` is completely removed from `S`.
+func (S Multiset[A]) Remove(e A, m int) {
+    if n := S.Lookup(e); n <= m {
         delete(S.elems, e)
-        S.count--
-    } else if n > 1 {
-        S.elems[e] = n - 1
-        S.count--
+        S.count -= n
+    } else if n > m {
+        S.elems[e] = n - m
+        S.count -= m
     }
 }
 

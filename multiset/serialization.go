@@ -27,23 +27,31 @@ func (S *Multiset[A]) String() string {
 }
 
 
-// `MarshalJSON` returns the JSON representation of the multiset `S` as a list.
-// There are not guarantees on the order of the multiset elements.
+// `MarshalJSON` returns the JSON representation of the multiset `S` as a
+// list. An element is listed multiple time If its multiplicity is greater than
+// 1.  There are not guarantees on the order of the multiset elements.
 func (S *Multiset[A]) MarshalJSON() ([]byte, error) {
     bs := []byte("[")
     var err error
     for e, n := range S.Elems() {
-        if len(bs) > 1 {
-            bs = append(bs, ',')
-        }
         var ds []byte
         if ds, err = json.Marshal(e); err != nil {
             break
         }
-        bs = append(bs, []byte(fmt.Sprintf(`{"element":%s,"multiplicity":%d}`, ds, n))...)
+        // Include the element's JSON representation as often as its
+        // multiplicity.
+        for i := 0; i < n; i++ {
+            if len(bs) > 1 {
+                bs = append(bs, ',')
+            }
+            bs = append(bs, ds...)
+        }
     }
     if err != nil {
         // Append the null JSON value in case of an error.
+        if len(bs) > 1 {
+            bs = append(bs, ',')
+        }
         bs = append(bs, []byte("null")...)
     }
     bs = append(bs, ']')
@@ -56,20 +64,15 @@ func (S *Multiset[A]) MarshalJSON() ([]byte, error) {
 func (S *Multiset[A]) UnmarshalJSON(data []byte) error {
     // Unmarshal data first into a slice.  Not very efficient but simple to
     // implement.
-    var ds []struct{
-        Element      A   `json:"element"`
-        Multiplicity int `json:"multiplicity"`
-    }
+    var ds []A
     if err := json.Unmarshal(data, &ds); err != nil {
         return err
     }
 
-    // Add slice elements to the empty skip list.
+    // Add slice elements to the empty multiset..
     S.Reset()
     for _, d := range ds {
-        for i := 0; i < d.Multiplicity; i++ {
-            S.Add(d.Element)
-        }
+        S.Add(d, 1)
     }
     return nil
 }
