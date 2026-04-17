@@ -14,8 +14,11 @@ func TestString(t *testing.T) {
     S.Add("bar")
     S.Add("baz")
 
-    if S.Len() != 4 {
-        t.Errorf("wrong size")
+    if S.Card() != 4 {
+        t.Errorf("wrong cardinality")
+    }
+    if S.Len() != 3 {
+        t.Errorf("wrong support size")
     }
 
     t.Logf("%s", S)
@@ -55,7 +58,7 @@ func TestAddRemove(t *testing.T) {
     if m := S.Lookup("foo"); m != 0 {
         t.Errorf("expected that foo's multiplicity is 0, not %d", m)
     }
-    if S.Len() != 0 || S.String() != "{}" {
+    if S.Card() != 0 || S.String() != "{}" {
         t.Errorf("exptected the empty multiset")
     }
 }
@@ -99,7 +102,7 @@ func TestIterate(t *testing.T) {
         c += n
     }
 
-    if c != S.Len() {
+    if c != S.Card() {
         t.Errorf("expected size %d, not %d", c, S.Len())
     }
 }

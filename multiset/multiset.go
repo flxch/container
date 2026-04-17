@@ -27,9 +27,14 @@ func New[A comparable]() *Multiset[A] {
 }
 
 
-// `Len` returns the number of elements in the multiset `S`.
-func (S *Multiset[A]) Len() int {
+// `Card` returns the cardinality of the multiset `S`.
+func (S *Multiset[A]) Card() int {
     return S.count
+}
+
+// `Len` returns the size of the support of the multiset `S`.
+func (S *Multiset[A]) Len() int {
+    return len(S.elems)
 }
 
 // `Reset` empties the multiset `S`.
