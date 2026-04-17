@@ -27,9 +27,9 @@ func (S *Multiset[A]) String() string {
 }
 
 
-// `MarshalJSON` returns the JSON representation of the multiset `S` as a
-// list. An element is listed multiple time If its multiplicity is greater than
-// 1.  There are not guarantees on the order of the multiset elements.
+// `MarshalJSON` returns the JSON representation of the multiset `S` as a list.
+// An element is listed multiple time if its multiplicity is greater than 1.
+// There are no guarantees on the order of the multiset elements.
 func (S *Multiset[A]) MarshalJSON() ([]byte, error) {
     bs := []byte("[")
     var err error
@@ -69,7 +69,7 @@ func (S *Multiset[A]) UnmarshalJSON(data []byte) error {
         return err
     }
 
-    // Add slice elements to the empty multiset..
+    // Add slice elements to the empty multiset.
     S.Reset()
     for _, d := range ds {
         S.Add(d, 1)

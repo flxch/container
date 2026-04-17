@@ -24,7 +24,7 @@ var sizes []int = []int{100, 1000, 10000}
 
 var global *multiset.Multiset[int]
 
-// Benchmark the insertion of a new element in a multiset
+// Benchmark the insertion of a new element in a multiset.
 func BenchmarkMultiset_Add(b *testing.B) {
     for _, size := range sizes {
         b.Run(fmt.Sprintf("%d", size), func(b *testing.B) {

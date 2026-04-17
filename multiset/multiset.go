@@ -99,7 +99,7 @@ func (S *Multiset[A]) Remove(e A, m int) {
 }
 
 
-// `Union` makes `S` the union of the multisets `S` and `T`..
+// `Union` makes `S` the union of the multisets `S` and `T`.
 func (S *Multiset[A]) Union(T *Multiset[A]) {
     for e, m := range T.elems {
         n := S.Lookup(e)
