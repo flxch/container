@@ -16,11 +16,11 @@ func ExampleMultiset() {
     S.Add("baz", 1)
 
     // Iterate through the multiset's elements.
-    for e, n := range S.Elems() {
+    for e, m := range S.Elements() {
         // Note that there is no order on the multiset elements.  However, since
         // only one element has a multiplicity greater than 1 in S, the output
         // is always the string "foo" here.
-        if n > 1 {
+        if m > 1 {
             fmt.Println(e)
         }
     }

@@ -5,10 +5,10 @@ import (
 )
 
 
-// `Elems` returns an iterator for iterating through the elements with their
-// multiplicites in the multiset `S`.  There is guarantee on the order of the
-// elements in `S`.
-func (S *Multiset[A]) Elems() iter.Seq2[A, int] {
+// `Elements` returns an iterator for iterating through the elements of the
+// multiset `S` with their multiplicites.  There is guarantee on the iteration
+// order.
+func (S *Multiset[A]) Elements() iter.Seq2[A, int] {
     return func(yield func(A, int) bool) {
         for e, n := range S.elems {
             if !yield(e, n) {
@@ -18,9 +18,9 @@ func (S *Multiset[A]) Elems() iter.Seq2[A, int] {
     }
 }
 
-// `Supp` returns an iterator for iterating through the support of the multiset
-// `S`.  There is guarantee on the support order.
-func (S *Multiset[A]) Supp() iter.Seq[A] {
+// `Support` returns an iterator for iterating through the support of the
+// multiset `S`.  There is guarantee on the iteration order.
+func (S *Multiset[A]) Support() iter.Seq[A] {
     return func(yield func(A) bool) {
         for e := range S.elems {
             if !yield(e) {

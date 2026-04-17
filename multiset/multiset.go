@@ -53,8 +53,8 @@ func (S *Multiset[A]) Clone() *Multiset[A] {
 }
 
 
-// `Support` returns the support (as a slice) of the multiset `S`.
-func (S *Multiset[A]) Support() []A {
+// `Supp` returns the support (as a slice) of the multiset `S`.
+func (S *Multiset[A]) Supp() []A {
     s := make([]A, 0, len(S.elems))
     for e := range S.elems {
         s = append(s, e)

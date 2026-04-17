@@ -33,7 +33,7 @@ func (S *Multiset[A]) String() string {
 func (S *Multiset[A]) MarshalJSON() ([]byte, error) {
     bs := []byte("[")
     var err error
-    for e, n := range S.Elems() {
+    for e, n := range S.elems {
         var ds []byte
         if ds, err = json.Marshal(e); err != nil {
             break
