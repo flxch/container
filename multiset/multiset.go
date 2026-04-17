@@ -27,7 +27,8 @@ func New[A comparable]() *Multiset[A] {
 }
 
 
-// `Card` returns the cardinality of the multiset `S`.
+// `Card` returns the cardinality of the multiset `S`, i.e., the sum of the
+// elements' multiplicities.
 func (S *Multiset[A]) Card() int {
     return S.count
 }
@@ -104,6 +105,7 @@ func (S *Multiset[A]) Union(T *Multiset[A]) {
     }
 }
 
+// `Union` returns the union of the multisets `S` and `T`.
 func Union[A comparable](S, T *Multiset[A]) *Multiset[A] {
     R := S.Clone()
     R.Union(T)
@@ -119,6 +121,7 @@ func (S *Multiset[A]) Sum(T *Multiset[A]) {
     }
 }
 
+// `Sum` returns the sum of the multisets `S` and `T`.
 func Sum[A comparable](S, T *Multiset[A]) *Multiset[A] {
     R := S.Clone()
     R.Sum(T)
@@ -140,6 +143,7 @@ func (S *Multiset[A]) Intersection(T *Multiset[A]) {
     }
 }
 
+// `Intersection` returns the intersection of the multisets `S` and `T`.
 func Intersection[A comparable](S, T *Multiset[A]) *Multiset[A] {
     R := S.Clone()
     R.Intersection(T)
@@ -159,6 +163,7 @@ func (S *Multiset[A]) Difference(T *Multiset[A]) {
     }
 }
 
+// `Difference` returns the difference of the muliset `S` from `T`.
 func Difference[A comparable](S, T *Multiset[A]) *Multiset[A] {
     R := S.Clone()
     R.Difference(T)
@@ -171,6 +176,7 @@ func (S *Multiset[A]) Equal(T *Multiset[A]) bool {
     return S.count == T.count && maps.Equal(S.elems, T.elems)
 }
 
+// `Equal` returns true if the mulitsets `S` and `T` are equal.
 func Equal[A comparable](S, T *Multiset[A]) bool {
     return S.Equal(T)
 }
