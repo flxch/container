@@ -10,7 +10,7 @@ import (
 func valid[A comparable](S *multiset.Multiset[A]) error {
     n := 0
     s := 0
-    for e, m := range S.Elements() {
+    for e, m := range S.Elements {
         n++
         if m <= 0 {
             return fmt.Errorf("element %v with invalid multiplicity: %d", e, m)
@@ -152,7 +152,7 @@ func TestIterate(t *testing.T) {
     S.Add("baz", 1)
 
     c := 0
-    for _, n := range S.Elements() {
+    for _, n := range S.Elements {
         c += n
     }
 
