@@ -35,11 +35,11 @@ func TestString(t *testing.T) {
     S.Add("bar", 1)
     S.Add("baz", 1)
 
+    t.Logf("%s", S)
+
     if err := valid(S); err != nil {
         t.Errorf("invalid multiset: %v", err)
     }
-
-    t.Logf("%s", S)
 }
 
 
@@ -94,7 +94,6 @@ func TestUnion(t *testing.T) {
     S.Add("foo", 2)
     S.Add("bar", 1)
     S.Add("baz", 1)
-
     T := multiset.New[string]()
     T.Add("foo", 1)
     T.Add("bar", 2)
@@ -113,6 +112,35 @@ func TestUnion(t *testing.T) {
     }
     if m := S.Lookup("bar"); m != 2 {
         t.Errorf("expected that bar's multiplicity is 2, not %d", m)
+    }
+}
+
+func TestIntersection(t *testing.T) {
+    S := multiset.New[string]()
+    S.Add("foo", 2)
+    S.Add("bar", 1)
+    S.Add("baz", 1)
+    T := multiset.New[string]()
+    T.Add("foo", 1)
+    T.Add("bar", 2)
+    T.Add("goo", 3)
+
+    S.Intersection(T)
+
+    if err := valid(S); err != nil {
+        t.Errorf("invalid multiset: %v", err)
+    }
+    if m := S.Lookup("foo"); m != 1 {
+        t.Errorf("expected that foo's multiplicity is 1, not %d", m)
+    }
+    if m := S.Lookup("bar"); m != 1 {
+        t.Errorf("expected that bar's multiplicity is 1, not %d", m)
+    }
+    if m := S.Lookup("goo"); m != 0 {
+        t.Errorf("expected that gos'ss multiplicity is 0, not %d", m)
+    }
+    if m := S.Lookup("baz"); m != 0 {
+        t.Errorf("expected that baz's multiplicity is 0, not %d", m)
     }
 }
 

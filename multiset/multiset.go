@@ -141,7 +141,7 @@ func (S *Multiset[A]) Intersection(T *Multiset[A]) {
             S.count -= n
         } else {
             S.elems[e] = min(n, m)
-            if n > m {
+            if m > n {
                 S.count -= m - n
             }
         }
