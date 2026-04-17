@@ -408,3 +408,37 @@ func TestResetHeights(t *testing.T) {
         t.Errorf("%v: %s", err, l)
     }
 }
+
+
+func TestHop(t *testing.T) {
+    l := New[kvpair](cmp)
+    l.Add(kvpair{0, "foo"})
+    l.Add(kvpair{2, "goo"})
+    l.Add(kvpair{1, "moo"})
+    l.Add(kvpair{-1, "bar"})
+    l.Add(kvpair{-2, "baz"})
+    t.Logf("%s", l)
+
+    e := l.Lookup(kvpair{1, ""})
+    if e == nil {
+        t.Errorf("failed to find element with key 1")
+    }
+    if cmp(e.Value, kvpair{1, "moo"}) != 0 {
+        t.Errorf("wrong lookup: %v", e.Value)
+    }
+
+    e = e.Hop(-2)
+    if e == nil {
+        t.Errorf("should not have hopped to the beginning of the list")
+    } else if cmp(e.Value, kvpair{-1, "bar"}) != 0 {
+        t.Errorf("hopped (backwards) to the wrong element: %v", e.Value)
+    }
+    e = e.Hop(3)
+    if cmp(e.Value, kvpair{2, "goo"}) != 0 {
+        t.Errorf("hopped (forwards) to the wrong element: %v", e.Value)
+    }
+    e = e.Hop(2)
+    if e != nil {
+        t.Errorf("should have hopped to the list end")
+    }
+}

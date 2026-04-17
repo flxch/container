@@ -38,6 +38,19 @@ func (e *Element[Data]) Prev() *Element[Data] {
     return e.neighbors[0].prev
 }
 
+// `Hop` returns the element that is `d` hops away from the element `e`.  That
+// is, if `d` is negative, it is before `e` and if `d` is positive, it is after
+// `e`.  `Hop` returns nil if the beginning or the end of the skip list has been
+// reached.
+func (e *Element[Data]) Hop(d int) *Element[Data] {
+    if d < 0 {
+        for i := d; i < 0 && e != nil; i, e = i + 1, e.Prev() { }
+    } else if d > 0 {
+        for i := 0; i < d && e != nil; i, e = i + 1, e.Next() { }
+    }
+    return e
+}
+
 
 // `InsertBefore` inserts the value `val` as a new element right before the
 // element `e` in the skip list of `e`.  It is not checked whether the values
