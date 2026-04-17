@@ -76,20 +76,25 @@ func (S *Multiset[A]) Lookup(e A) int {
 // `Add` adds the element `e` to the multiset `S` with multiplicity `m`.  Note
 // that if `S` already contains `e`, `e`'s multiplicity in `S` increases by `m`.
 func (S *Multiset[A]) Add(e A, m int) {
-    S.elems[e] = m + S.Lookup(e)
-    S.count += m
+    if m > 0 {
+        n := S.Lookup(e)
+        S.elems[e] = m + n
+        S.count += m
+    }
 }
 
 // `Remove` removes the element `e` from the multiset `S` with multiplicity `m`.
 // That is, `e`'s multiplicity in `S` decreses by `m`, provided that `n > m`.
 // Note that if `m >= n`, `e` is completely removed from `S`.
-func (S Multiset[A]) Remove(e A, m int) {
-    if n := S.Lookup(e); n <= m {
-        delete(S.elems, e)
-        S.count -= n
-    } else if n > m {
-        S.elems[e] = n - m
-        S.count -= m
+func (S *Multiset[A]) Remove(e A, m int) {
+    if m > 0 {
+        if n := S.Lookup(e); n > 0 && n <= m {
+            delete(S.elems, e)
+            S.count -= n
+        } else if n > m {
+            S.elems[e] = n - m
+            S.count -= m
+        }
     }
 }
 
@@ -99,8 +104,8 @@ func (S *Multiset[A]) Union(T *Multiset[A]) {
     for e, m := range T.elems {
         n := S.Lookup(e)
         S.elems[e] = max(m, n)
-        if n > m {
-            S.count += n - m
+        if m > n {
+            S.count += m - n
         }
     }
 }

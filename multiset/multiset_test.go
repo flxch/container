@@ -1,9 +1,30 @@
 package multiset_test
 
 import (
+    "fmt"
     "testing"
     "github.com/flxch/container/multiset"
 )
+
+
+func valid[A comparable](S *multiset.Multiset[A]) error {
+    n := 0
+    s := 0
+    for e, m := range S.Elems() {
+        n++
+        if m <= 0 {
+            return fmt.Errorf("element %v with invalid multiplicity: %d", e, m)
+        }
+        s += m
+    }
+    if s != S.Card() {
+        return fmt.Errorf("wrong cardinality %d != %d", s, S.Card())
+    }
+    if n != S.Len() {
+        return fmt.Errorf("wrong support %d != %d", n, S.Len())
+    }
+    return nil
+}
 
 
 func TestString(t *testing.T) {
@@ -14,11 +35,8 @@ func TestString(t *testing.T) {
     S.Add("bar", 1)
     S.Add("baz", 1)
 
-    if S.Card() != 4 {
-        t.Errorf("wrong cardinality")
-    }
-    if S.Len() != 3 {
-        t.Errorf("wrong support size")
+    if err := valid(S); err != nil {
+        t.Errorf("invalid multiset: %v", err)
     }
 
     t.Logf("%s", S)
@@ -31,6 +49,9 @@ func TestAddRemove(t *testing.T) {
     S.Add("foo", 2)
     S.Add("bar", 1)
     S.Add("baz", 1)
+    if err := valid(S); err != nil {
+        t.Errorf("invalid multiset: %v", err)
+    }
     if m := S.Lookup("foo"); m != 2 {
         t.Errorf("expected that foo's multiplicity is 2, not %d", m)
     }
@@ -43,6 +64,9 @@ func TestAddRemove(t *testing.T) {
 
     S.Remove("foo", 1)
     S.Remove("baz", 1)
+    if err := valid(S); err != nil {
+        t.Errorf("invalid multiset: %v", err)
+    }
     if m := S.Lookup("foo"); m != 1 {
         t.Errorf("expected that foo's multiplicity is 1, not %d", m)
     }
@@ -54,6 +78,9 @@ func TestAddRemove(t *testing.T) {
     }
 
     S.Reset()
+    if err := valid(S); err != nil {
+        t.Errorf("invalid multiset: %v", err)
+    }
     if m := S.Lookup("foo"); m != 0 {
         t.Errorf("expected that foo's multiplicity is 0, not %d", m)
     }
@@ -75,6 +102,9 @@ func TestUnion(t *testing.T) {
 
     S.Union(T)
 
+    if err := valid(S); err != nil {
+        t.Errorf("invalid multiset: %v", err)
+    }
     if m := S.Lookup("foo"); m != 2 {
         t.Errorf("expected that foo's multiplicity is 2, not %d", m)
     }
