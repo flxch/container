@@ -10,17 +10,17 @@ func ExampleMultiset() {
     // Create an empty multiset.
     S := multiset.New[string]()
 
-    // Add elements to the multiset.
+    // Add some elements to the multiset.
     S.Add("foo")
     S.Add("foo")
     S.Add("bar")
     S.Add("baz")
 
-    // Iterate through multiset elements.
-    for e, n := range S.All() {
-        // Note that the order is not guaranteed.  However, since only one
-        // element has a multiplicity greater than 1, the output is always the
-        // string "foo".
+    // Iterate through the multiset's elements.
+    for e, n := range S.Elems() {
+        // Note that there is no order on the multiset elements.  However, since
+        // only one element has a multiplicity greater than 1 in S, the output
+        // is always the string "foo" here.
         if n > 1 {
             fmt.Println(e)
         }

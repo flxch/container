@@ -5,11 +5,13 @@ import (
 )
 
 
-// A (finite) multiset is similar to a (finite) set but it additionally it
-// counts how often an element is contained in the multiset, i.e., the element's
+// A (finite) multiset is similar to a (finite) set but it additionally counts
+// how often an element is contained in the multiset, i.e., the element's
 // multiplicity.
 type Multiset[A comparable] struct {
+    // Elements with their multiplicites.
     elems map[A]int
+    // Total number of elements in the multiset, i.e., sum of all multiplicites.
     count int
 }
 
@@ -84,14 +86,23 @@ func (S Multiset[A]) Remove(e A) {
 }
 
 
-// `Union` adds the elements of the multiset `T` to the multiset `S`.
+// `Union` makes `S` the union of the multisets `S` and `T`..
 func (S *Multiset[A]) Union(T *Multiset[A]) {
     for e, m := range T.elems {
-        n :=  S.Lookup(e)
+        n := S.Lookup(e)
         S.elems[e] = max(m, n)
         if n > m {
-            S.count +=  n - m
+            S.count += n - m
         }
+    }
+}
+
+// `Sum` adds the elements of the multiset `T` to the multiset `S`.
+func (S *Multiset[A]) Sum(T *Multiset[A]) {
+    for e, m := range T.elems {
+        n := S.Lookup(e)
+        S.elems[e] = m + n
+        S.count += n
     }
 }
 

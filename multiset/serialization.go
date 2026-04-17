@@ -32,7 +32,7 @@ func (S *Multiset[A]) String() string {
 func (S *Multiset[A]) MarshalJSON() ([]byte, error) {
     bs := []byte("[")
     var err error
-    for e, n := range S.All() {
+    for e, n := range S.Elems() {
         if len(bs) > 1 {
             bs = append(bs, ',')
         }
