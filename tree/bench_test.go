@@ -135,7 +135,7 @@ func BenchmarkTree_Lookup(b *testing.B) {
 
 // Benchmark the cloning of a tree.
 var clone *tree.Tree[int]
-func BenchmarkClone(b *testing.B) {
+func BenchmarkTree_Clone(b *testing.B) {
     for _, size := range sizes {
         b.Run(fmt.Sprintf("%d", size), func(b *testing.B) {
             b.StopTimer()
