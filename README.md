@@ -44,9 +44,8 @@ BenchmarkTree_Clone/1000       	   52746	     23074 ns/op	   32792 B/op	       2
 BenchmarkTree_Clone/10000      	    3345	    378581 ns/op	  327704 B/op	       2 allocs/op
 ```
 
-#### Comparison with llrb Package
-
-Source: [github.com/petar/GoLLRB/llrb](https://pkg.go.dev/github.com/petar/GoLLRB/llrb)
+* Comparison with [llrb](https://pkg.go.dev/github.com/petar/GoLLRB/llrb)
+  package ([github.com/petar/GoLLRB/llrb](github.com/petar/GoLLRB/llrb))
 ```
 BenchmarkLlrb_Lookup/100       	 4447273	       266.2 ns/op	      16 B/op	       1 allocs/op
 BenchmarkLlrb_Lookup/1000      	 3717766	       321.4 ns/op	      16 B/op	       1 allocs/op
@@ -79,6 +78,22 @@ BenchmarkSkiplist_Remove/10000   3230275	       367.5 ns/op	       0 B/op	      
 BenchmarkSkiplist_Clone/100        79369	     15584 ns/op	   18240 B/op	     106 allocs/op
 BenchmarkSkiplist_Clone/1000        6622	    192717 ns/op	  221184 B/op	    1006 allocs/op
 BenchmarkSkiplist_Clone/10000        291	   4226021 ns/op	 2807680 B/op	   10006 allocs/op
+```
+
+* Comparison with [skiplist](https://pkg.go.dev/github.com/MauriceGit/skiplist)
+  package ([https://github.com/MauriceGit/skiplist](https://github.com/MauriceGit/skiplist))
+```
+BenchmarkMauriceSkiplist_Lookup/100    	 4997842	       241.6 ns/op	      16 B/op	       1 allocs/op
+BenchmarkMauriceSkiplist_Lookup/1000   	 3822523	       295.8 ns/op	      16 B/op	       1 allocs/op
+BenchmarkMauriceSkiplist_Lookup/10000  	 2992701	       406.0 ns/op	      16 B/op	       1 allocs/op
+
+BenchmarkMauriceSkiplist_Add/100       	 2569099	       465.0 ns/op	     256 B/op	       2 allocs/op
+BenchmarkMauriceSkiplist_Add/1000      	 2017052	       582.0 ns/op	     256 B/op	       2 allocs/op
+BenchmarkMauriceSkiplist_Add/10000     	 1000000	      1068 ns/op	     256 B/op	       2 allocs/op
+
+BenchmarkMauriceSkiplist_Remove/100    	 4102495	       292.5 ns/op	      16 B/op	       1 allocs/op
+BenchmarkMauriceSkiplist_Remove/1000   	 3232776	       374.4 ns/op	      16 B/op	       1 allocs/op
+BenchmarkMauriceSkiplist_Remove/10000  	 2549719	       484.5 ns/op	      16 B/op	       1 allocs/op
 ```
 
 ### Multisets

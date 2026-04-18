@@ -11,11 +11,6 @@ import (
 // Benchmarks for some functions of the llrb package for comparing them with the
 // corresponding functions of the tree package.
 
-
-// Tree sizes for the benchmarks.
-var sizes []int = []int{100, 1000, 10000}
-
-
 // Elements of the llrb trees.
 type llrbElem struct {
     key int
