@@ -1,17 +1,19 @@
-package tree_test
+package container_test
 
 import (
     "fmt"
     "testing"
     "math/rand/v2"
-
     "github.com/petar/GoLLRB/llrb"
 )
 
 
 // Benchmarks for some functions of the llrb package for comparing them with the
-// corresponding functions of the tree package.  No functions from the tree package
-// are used in this file.
+// corresponding functions of the tree package.
+
+
+// Tree sizes for the benchmarks.
+var sizes []int = []int{100, 1000, 10000}
 
 
 // Elements of the llrb trees.
@@ -28,7 +30,7 @@ func (e llrbElem) Less(item llrb.Item) bool {
     return e.key < f.key
 }
 
-
+// Random tree with n elements.
 func llrbRandom(n int) *llrb.LLRB {
     t := llrb.New()
     for t.Len() < n {
@@ -39,6 +41,39 @@ func llrbRandom(n int) *llrb.LLRB {
 
 
 var llrbTree  *llrb.LLRB
+
+func BenchmarkLlrb_Lookup(b *testing.B) {
+    for _, size := range sizes {
+        b.Run(fmt.Sprintf("%d", size), func(b *testing.B) {
+            b.StopTimer()
+            b.ReportAllocs()
+            // Generate a random tree containing `size` values.
+            llrbTree = llrbRandom(size)
+            for i := 0; i < b.N; i++ {
+                // Insert the value first, since we want to benchmark the lookup
+                // of an existing value.
+                var value int
+                for {
+                    value = rand.Int()
+                    if !llrbTree.Has(llrbElem{value}) {
+                        llrbTree.InsertNoReplace(llrbElem{value})
+                        break
+                    }
+                }
+                b.StartTimer()
+                item := llrbTree.Get(llrbElem{value})
+                e, ok := item.(llrbElem)
+                b.StopTimer()
+                if !ok || e.key != value {
+                    panic("wrong tree element")
+                }
+                // Remove the value again, since we want to benchmark the lookup
+                // of a value for a tree of a fixed size.
+                llrbTree.Delete(llrbElem{value})
+            }
+        })
+    }
+}
 
 func BenchmarkLlrb_Add(b *testing.B) {
     for _, size := range sizes {
@@ -93,35 +128,3 @@ func BenchmarkLlrb_Remove(b *testing.B) {
     }
 }
 
-func BenchmarkLlrb_Lookup(b *testing.B) {
-    for _, size := range sizes {
-        b.Run(fmt.Sprintf("%d", size), func(b *testing.B) {
-            b.StopTimer()
-            b.ReportAllocs()
-            // Generate a random tree containing `size` values.
-            llrbTree = llrbRandom(size)
-            for i := 0; i < b.N; i++ {
-                // Insert the value first, since we want to benchmark the lookup
-                // of an existing value.
-                var value int
-                for {
-                    value = rand.Int()
-                    if !llrbTree.Has(llrbElem{value}) {
-                        llrbTree.InsertNoReplace(llrbElem{value})
-                        break
-                    }
-                }
-                b.StartTimer()
-                item := llrbTree.Get(llrbElem{value})
-                e, ok := item.(llrbElem)
-                b.StopTimer()
-                if !ok || e.key != value {
-                    panic("wrong tree element")
-                }
-                // Remove the value again, since we want to benchmark the lookup
-                // of a value for a tree of a fixed size.
-                llrbTree.Delete(llrbElem{value})
-            }
-        })
-    }
-}
