@@ -95,6 +95,21 @@ BenchmarkMauriceSkiplist_Remove/100    	 4102495	       292.5 ns/op	      16 B/o
 BenchmarkMauriceSkiplist_Remove/1000   	 3232776	       374.4 ns/op	      16 B/op	       1 allocs/op
 BenchmarkMauriceSkiplist_Remove/10000  	 2549719	       484.5 ns/op	      16 B/op	       1 allocs/op
 ```
+* Comparison with [skiplist](https://pkg.go.dev/github.com/fogfish/skiplist)
+  package ([https://github.com/fogfish/skiplist](https://github.com/fogfish/skiplist))
+```
+BenchmarkFogfishSkiplist_Lookup/100    	 8270830	       132.7 ns/op	       0 B/op	       0 allocs/op
+BenchmarkFogfishSkiplist_Lookup/1000   	 6775532	       181.8 ns/op	       0 B/op	       0 allocs/op
+BenchmarkFogfishSkiplist_Lookup/10000  	 4532630	       271.0 ns/op	       0 B/op	       0 allocs/op
+
+BenchmarkFogfishSkiplist_Add/100       	 2798425	       424.2 ns/op	      44 B/op	       2 allocs/op
+BenchmarkFogfishSkiplist_Add/1000      	 2462802	       512.3 ns/op	      44 B/op	       2 allocs/op
+BenchmarkFogfishSkiplist_Add/10000     	 1737939	       689.8 ns/op	      44 B/op	       2 allocs/op
+
+BenchmarkFogfishSkiplist_Remove/100    	 6618768	       185.2 ns/op	       0 B/op	       0 allocs/op
+BenchmarkFogfishSkiplist_Remove/1000   	 5233880	       232.2 ns/op	       0 B/op	       0 allocs/op
+BenchmarkFogfishSkiplist_Remove/10000  	 3392054	       343.7 ns/op	       0 B/op	       0 allocs/op
+```
 
 ### Multisets
 
