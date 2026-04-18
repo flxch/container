@@ -8,6 +8,20 @@ Note that the packages are under development and thus not stable.
 Feedback, suggestions for improvements, and contributions are always
 welcome.
 
+## Benchmarks
+
+Run the benchmarks with `run_benchmarks.sh`.  It measures the
+dictionary operations of the container packages.  Some packages have
+further benchmarks.
+
+### Trees
+
+### Skip Lists
+
+### Sets
+
+### Multisets
+
 ## TODOs
 
 1. Implement packages for tries, heaps, ...

@@ -163,6 +163,25 @@ func BenchmarkSkiplist_Lookup(b *testing.B) {
 }
 
 
+// Benchmark the cloning of a skip list.
+var clone *skiplist.Skiplist[int]
+func BenchmarkSkiplist_Clone(b *testing.B) {
+    for _, size := range sizes {
+        b.Run(fmt.Sprintf("%d", size), func(b *testing.B) {
+            b.StopTimer()
+            b.ReportAllocs()
+            for i := 0; i < b.N; i++ {
+                // Generate a random skip list containing `size` values.
+                global = random(size)
+                b.StartTimer()
+                clone = global.Clone(func(v int) int { return v })
+                b.StopTimer()
+            }
+        })
+    }
+}
+
+
 // Benchmark iterating through the elements of a skip list.
 func BenchmarkIterators(b *testing.B) {
     var sum int
