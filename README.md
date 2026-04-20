@@ -45,7 +45,7 @@ BenchmarkTree_Clone/10000      	    3345	    378581 ns/op	  327704 B/op	       2
 ```
 
 * Comparison with [llrb](https://pkg.go.dev/github.com/petar/GoLLRB/llrb)
-  package ([github.com/petar/GoLLRB/llrb](github.com/petar/GoLLRB/llrb))
+  package ([https://github.com/petar/GoLLRB/llrb](https://github.com/petar/GoLLRB/llrb))
 ```
 BenchmarkLlrb_Lookup/100       	 4447273	       266.2 ns/op	      16 B/op	       1 allocs/op
 BenchmarkLlrb_Lookup/1000      	 3717766	       321.4 ns/op	      16 B/op	       1 allocs/op
@@ -58,6 +58,21 @@ BenchmarkLlrb_Add/10000        	 1515982	       818.0 ns/op	      64 B/op	      
 BenchmarkLlrb_Remove/100       	 2508806	       456.0 ns/op	      16 B/op	       1 allocs/op
 BenchmarkLlrb_Remove/1000      	 1817882	       643.2 ns/op	      16 B/op	       1 allocs/op
 BenchmarkLlrb_Remove/10000     	 1275520	       961.1 ns/op	      16 B/op	       1 allocs/op
+```
+* Comparison with [rbtree](https://pkg.go.dev/github.com/mikenye/gotrees/rbtree)
+  package ([https://github.com/mikenye/gotrees/rbtree](https://github.com/mikenye/gotrees/rbtree))
+```
+BenchmarkRbtree_Lookup/100         	 9773158	       122.5 ns/op	       0 B/op	       0 allocs/op
+BenchmarkRbtree_Lookup/1000        	 7128234	       167.6 ns/op	       0 B/op	       0 allocs/op
+BenchmarkRbtree_Lookup/10000       	 5679423	       209.3 ns/op	       0 B/op	       0 allocs/op
+
+BenchmarkRbtree_Add/100            	 3773508	       315.2 ns/op	      48 B/op	       1 allocs/op
+BenchmarkRbtree_Add/1000           	 3305565	       357.1 ns/op	      48 B/op	       1 allocs/op
+BenchmarkRbtree_Add/10000          	 2622201	       456.1 ns/op	      48 B/op	       1 allocs/op
+
+BenchmarkRbtree_Remove/100         	 7847640	       153.7 ns/op	       0 B/op	       0 allocs/op
+BenchmarkRbtree_Remove/1000        	 5922166	       196.7 ns/op	       0 B/op	       0 allocs/op
+BenchmarkRbtree_Remove/10000       	 4731861	       247.7 ns/op	       0 B/op	       0 allocs/op
 ```
 
 ### Skip Lists
