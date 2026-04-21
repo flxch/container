@@ -1,8 +1,8 @@
 package multiset
 
 
-// `Elements` is an iterator through the elements of the multiset `S` with their
-// multiplicites.  There is guarantee on the iteration order.
+// `Elements` is an iterator for iterating through the elements of the multiset
+// `S` with their multiplicites.  There is no guarantee on the iteration order.
 func (S *Multiset[A]) Elements(yield func(A, int) bool) {
     for e, n := range S.elems {
         if !yield(e, n) {
@@ -11,8 +11,8 @@ func (S *Multiset[A]) Elements(yield func(A, int) bool) {
     }
 }
 
-// `Support` is an iterator through the support of the multiset `S`.  There is
-// guarantee on the iteration order.
+// `Support` is an iterator for iterating through the support of the multiset
+// `S`.  There is no guarantee on the iteration order.
 func (S *Multiset[A]) Support(yield func(A) bool) {
     for e := range S.elems {
         if !yield(e) {
