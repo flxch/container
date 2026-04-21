@@ -8,7 +8,7 @@ import (
 )
 
 
-// Benchmarks for some functions of the llrb package for comparing them with the
+// Benchmarks for some functions of the rbtree package for comparing them with the
 // corresponding functions of the tree package.
 
 

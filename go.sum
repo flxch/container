@@ -4,5 +4,7 @@ github.com/fogfish/golem/trait v0.2.0 h1:cgc+5TEpmoYfR3hMZZAJDvp7k9wRrYbrGT93isK
 github.com/fogfish/golem/trait v0.2.0/go.mod h1:MLcG+cb4EQvdvyW/dFUpm+1WWsmS/khiOlfs7Eoe1ko=
 github.com/fogfish/skiplist v0.15.0 h1:o3f6I20LsT4D17Vf9eyNyFd5CCGOXo147x1DSi4RbpE=
 github.com/fogfish/skiplist v0.15.0/go.mod h1:giiFtWK+lmnpgQQJzWFydHoTTGRzP+8kcBsKoS30iO8=
+github.com/mikenye/gotrees v1.1.0 h1:6DNAFaf6M3Tnj8+fKfYZHKGwyQ4J9uz6IkHyzWfuBHc=
+github.com/mikenye/gotrees v1.1.0/go.mod h1:Wmh7bYcaCETmuuKRXx1Edh4EbSpkbm2Y0GLD/G+S+YM=
 github.com/petar/GoLLRB v0.0.0-20210522233825-ae3b015fd3e9 h1:1/WtZae0yGtPq+TI6+Tv1WTxkukpXeMlviSxvL7SRgk=
 github.com/petar/GoLLRB v0.0.0-20210522233825-ae3b015fd3e9/go.mod h1:x3N5drFsm2uilKKuuYo6LdyD8vZAW55sH/9w+pbo1sw=

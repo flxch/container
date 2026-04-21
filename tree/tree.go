@@ -82,7 +82,7 @@ func (t *Tree[Data]) Len() int {
 
 // `Lookup` returns an element from the tree `t` whose order is the same as the
 // one of `key`.  If `key` is not contained in `t` then the returned element is
-//  undefined together with the Boolean value false.
+// undefined together with the Boolean value false.
 func (t *Tree[Data]) Lookup(key Data) (Data, bool) {
     h := t.root
     for h != nil {
@@ -169,7 +169,7 @@ func (t *Tree[Data]) remove(h *node[Data], elem Data) (*node[Data], Data, bool) 
         var sub *node[Data]
         h.right, sub = h.right.removeMin()
         if sub == nil {
-            panic("nil node in BST that should carry a data value")
+            panic("nil node in tree that should carry a data value")
         }
         h.data, del = sub.data, h.data
         return h.fixUp(), del, true
@@ -184,7 +184,7 @@ func (t *Tree[Data]) remove(h *node[Data], elem Data) (*node[Data], Data, bool) 
 // item.
 func (h *node[Data]) removeMin() (*node[Data], *node[Data]) {
     if h == nil {
-        panic("nil node in BST that should carry a data value")
+        panic("nil node in tree that should carry a data value")
         return nil, nil
     }
     if h.left == nil {
@@ -232,7 +232,7 @@ func (t *Tree[Data]) add(h *node[Data], elem Data) *node[Data] {
 // `Insert` inserts the element `elem` into the tree `t`.  In contrast to `Add`,
 // `Insert` replaces an existing element of the same order with `elem`.
 // `Insert` returns the replaced element (the returned value is undefined, if
-// `elem` does not replace an element in `t``).  The second return value is true
+// `elem` does not replace an element in `t`).  The second return value is true
 // if an element was replaced (i.e., the returned element existed in the tree).
 func (t *Tree[Data]) Insert(elem Data) (Data, bool) {
     var repl Data
@@ -329,7 +329,7 @@ func (h *node[Data]) rotateLeft() *node[Data] {
     x := h.right
     if x.black {
         // This should never be the case.
-        panic("rotating a black node in BST (rotateLeft)")
+        panic("rotating a black node in tree (rotateLeft)")
     }
     h.right = x.left
     x.left  = h
@@ -343,7 +343,7 @@ func (h *node[Data]) rotateRight() *node[Data] {
     x := h.left
     if x.black {
         // This should never be the case.
-        panic("rotating a black node in BST (rotateRight)")
+        panic("rotating a black node in tree (rotateRight)")
     }
     h.left  = x.right
     x.right = h
