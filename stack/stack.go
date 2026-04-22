@@ -21,12 +21,12 @@ func New[Data any]() *Stack[Data] {
 }
 
 
-// `Len` returns the number of elements on the stack `s`.
+// `Num` returns the number of elements on the stack `s`.
 func (s *Stack[Data]) Num() int {
     return s.top
 }
 
-// `Size` returns the current size of the stack `s`.
+// `Len` returns the current size of the stack `s`.
 func (s *Stack[Data]) Len() int {
     return len(s.elems)
 }
