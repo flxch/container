@@ -1,5 +1,7 @@
 package stack
 
+// The initial stack size when creating a stack.
+var InitialStackSize int = 32
 
 // Generic stack type.  Stack elements are stored in a slice.  The stack
 // implementation is not thread-safe.
@@ -8,15 +10,14 @@ type Stack[Data any] struct {
     elems []Data
     // First free position (index) on the stack.
     top   int
-    // Zero element (when popping stack elements) to free memory.
+    // Zero element to avoid potential memory leaks.
     zero  Data
 }
-
 
 // `New` creates a new, empty stack and returns it.
 func New[Data any]() *Stack[Data] {
     return &Stack[Data]{
-        elems: make([]Data, 64),
+        elems: make([]Data, InitialStackSize),
     }
 }
 
@@ -40,10 +41,20 @@ func (s *Stack[Data]) Cap() int {
 
 // `Reset` empties the stack `s`.
 func (s *Stack[Data]) Reset() {
-    for i := 0; i < s.top; i++ {
+    s.top = 0
+    // Note that the stack slots are not zeroed.  Use the method Free to avoid
+    // potential memory leaks.
+}
+
+// `Free` zeros the stack slots from `n` downwards.  This avoids potential
+// memory leaks.
+func (s *Stack[Data]) Free(n int) {
+    // Instead of a for loop, the Stack struct could have an additional field
+    // for a zero slice and copy it here into the stack.  This should be more
+    // efficient for large stacks.
+    for i := n; i >= s.top; i-- {
         s.elems[i] = s.zero // free memory
     }
-    s.top = 0
 }
 
 
@@ -51,7 +62,7 @@ func (s *Stack[Data]) Reset() {
 // elements can be pushed to `s` without another allocation.
 func (s *Stack[Data]) Grow(n int) {
     if n <= 0 {
-        panic("stack can only grow positively")
+        panic("invalid number for growing the stack")
     }
     if cap(s.elems) - s.top < n {
         s.elems = append(s.elems, make([]Data, n)...)
@@ -62,7 +73,7 @@ func (s *Stack[Data]) Grow(n int) {
 // reduction is larger than the elements on the stack.
 func (s *Stack[Data]) Shrink(n int) {
     if n <= 0 {
-        panic("stack can only shrink positively")
+        panic("invalid number for shrinking the stack")
     }
     if d := len(s.elems) - n; d > s.top {
         s.elems = s.elems[:d]
@@ -72,10 +83,10 @@ func (s *Stack[Data]) Shrink(n int) {
 
 // `Push` adds the element `d` to the stack `s`.
 func (s *Stack[Data]) Push(d Data) {
-    if s.top >= len(s.elems) {
-        s.elems = append(s.elems, d)
-    } else {
+    if s.top < len(s.elems) {
         s.elems[s.top] = d
+    } else {
+        s.elems = append(s.elems, d)
     }
     s.top++
 }
@@ -88,9 +99,9 @@ func (s *Stack[Data]) Pop() (Data, bool) {
         return s.zero, false
     }
     s.top--
-    r := s.elems[s.top]
-    s.elems[s.top] = s.zero // free memory
-    return r, true
+    // Note that the stack slot is not zeroed.  Use the method Free to avoid
+    // potential memory leaks.
+    return s.elems[s.top], true
 }
 
 
