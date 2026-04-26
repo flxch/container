@@ -1,7 +1,7 @@
 package stack
 
 // The initial stack size when creating a stack.
-var InitialStackSize int = 32
+var InitialStackSize int = 16
 
 // Generic stack type.  Stack elements are stored in a slice.  The stack
 // implementation is not thread-safe.
