@@ -1,5 +1,6 @@
 package stack
 
+
 // The initial stack size when creating a stack.
 var InitialStackSize int = 16
 
@@ -10,8 +11,6 @@ type Stack[Data any] struct {
     elems []Data
     // First free position (index) on the stack.
     top   int
-    // Zero element to avoid potential memory leaks.
-    zero  Data
 }
 
 // `New` creates a new, empty stack and returns it.
@@ -51,9 +50,10 @@ func (s *Stack[Data]) Reset() {
 func (s *Stack[Data]) Free(n int) {
     // Instead of a for loop, the Stack struct could have an additional field
     // for a zero slice and copy it here into the stack.  This should be more
+    var zero Data
     // efficient for large stacks.
     for i := n; i >= s.top; i-- {
-        s.elems[i] = s.zero // free memory
+        s.elems[i] = zero // free memory
     }
 }
 
@@ -96,7 +96,8 @@ func (s *Stack[Data]) Push(d Data) {
 // argument false.
 func (s *Stack[Data]) Pop() (Data, bool) {
     if s.top == 0 {
-        return s.zero, false
+        var zero Data
+        return zero, false
     }
     s.top--
     // Note that the stack slot is not zeroed.  Use the method Free to avoid
@@ -110,7 +111,8 @@ func (s *Stack[Data]) Pop() (Data, bool) {
 // false.
 func (s *Stack[Data]) Peek() (Data, bool) {
     if s.top == 0 {
-        return s.zero, false
+        var zero Data
+        return zero, false
     }
     return s.elems[s.top - 1], true
 }
