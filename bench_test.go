@@ -28,8 +28,12 @@ func cmp(n, m int) int {
     }
 }
 
+
+// Overflows and underflows are possibe for negative integers.  Save if only
+// using the positive integers of the int type.
 func cmpsub(n, m int) int { return n - m }
 
+// Two calls are necessary when checking for equality.
 func less(n, m int) bool { return n < m }
 
 func BenchmarkCompare(b *testing.B) {
