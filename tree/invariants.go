@@ -35,7 +35,6 @@ func (t *Tree[Data]) IsLlrbTree() error {
     return nil
 }
 
-
 func (t *Tree[Data]) noDuplicates() error {
     visited := make([]Data, 0, t.Len())
     for d := range t.Ascend {
@@ -49,7 +48,6 @@ func (t *Tree[Data]) noDuplicates() error {
     }
     return nil
 }
-
 
 func (n *node[Data]) isSearchTree(cmp func(Data, Data) int, min, max option.Option[Data]) error {
     if n == nil {
@@ -72,7 +70,6 @@ func (n *node[Data]) isSearchTree(cmp func(Data, Data) int, min, max option.Opti
     return nil
 }
 
-
 func (n *node[Data]) noConsecutiveReds() error {
     if n == nil {
         return nil
@@ -91,7 +88,6 @@ func (n *node[Data]) noConsecutiveReds() error {
     return nil
 }
 
-
 func (n *node[Data]) isLeftLeaning() error {
     if n == nil {
         return nil
@@ -109,7 +105,6 @@ func (n *node[Data]) isLeftLeaning() error {
     }
     return nil
 }
-
 
 func (t *Tree[Data]) isBlackBalanced() error {
     paths := make(map[*node[Data]]int, t.Len())

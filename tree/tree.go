@@ -101,6 +101,24 @@ func (t *Tree[Data]) Len() int {
     return t.count
 }
 
+// `PathLen` returns the number of black nodes from the root to a leaf.
+func (t *Tree[Data]) PathLen() int {
+    c := 0
+    n := t.root;
+    for n != nil {
+        if n.isBlack() {
+            c++
+        }
+        if n.right != nil {
+            // Prefer going right, since there are no red nodes.
+            n = n.right
+        } else {
+            n = n.left
+        }
+    }
+    return c
+}
+
 
 // `Lookup` returns an element from the tree `t` whose order is the same as the
 // one of `key`.  If `key` is not contained in `t` then the returned element is
