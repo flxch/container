@@ -72,7 +72,8 @@ func best(n int) *tree.Tree[int] {
 func TestBuild(t *testing.T) {
     T := build(65536)
     t.Logf("path length: %d", T.PathLen())
-    t.Logf("red nodes: %d", T.RedLen())
+    blacks, reds := T.NodeLen()
+    t.Logf("number of nodes: %d (%d black, %d red)", T.Len(), blacks, reds)
     if T.Len() != 65536 {
         t.Logf("wrong tree size: %d", T.Len())
     } else if err := T.IsLlrbTree(); err != nil {
@@ -83,7 +84,8 @@ func TestBuild(t *testing.T) {
 func TestRandom(t *testing.T) {
     T := random(65536)
     t.Logf("path length: %d", T.PathLen())
-    t.Logf("red nodes: %d", T.RedLen())
+    blacks, reds := T.NodeLen()
+    t.Logf("number of nodes: %d (%d black, %d red)", T.Len(), blacks, reds)
     if T.Len() != 65536 {
         t.Logf("wrong tree size: %d", T.Len())
     } else if err := T.IsLlrbTree(); err != nil {
@@ -94,7 +96,8 @@ func TestRandom(t *testing.T) {
 func TestWorst(t *testing.T) {
     T := worst(65536)
     t.Logf("path length: %d", T.PathLen())
-    t.Logf("red nodes: %d", T.RedLen())
+    blacks, reds := T.NodeLen()
+    t.Logf("number of nodes: %d (%d black, %d red)", T.Len(), blacks, reds)
     if T.Len() != 65536 {
         t.Logf("wrong tree size: %d", T.Len())
     } else if err := T.IsLlrbTree(); err != nil {
@@ -105,7 +108,8 @@ func TestWorst(t *testing.T) {
 func TestBest(t *testing.T) {
     T := best(65536)
     t.Logf("path length: %d", T.PathLen())
-    t.Logf("red nodes: %d", T.RedLen())
+    blacks, reds := T.NodeLen()
+    t.Logf("number of nodes: %d (%d black, %d red)", T.Len(), blacks, reds)
     if T.Len() != 65536 {
         t.Logf("wrong tree size: %d", T.Len())
     } else if err := T.IsLlrbTree(); err != nil {

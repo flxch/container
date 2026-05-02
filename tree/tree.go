@@ -112,7 +112,7 @@ func (t *Tree[Data]) PathLen() int {
             c++
         }
         if n.right != nil {
-            // Prefer going right, since there are no red nodes.
+            // Prefer going right, since the right child is not red.
             n = n.right
         } else {
             n = n.left
@@ -121,9 +121,10 @@ func (t *Tree[Data]) PathLen() int {
     return c
 }
 
-// `RedLen` returns the number of red nodes in the tree `t`.
-func (t *Tree[Data]) RedLen() int {
-    return t.root.countReds()
+// `NodeLen` returns the number of black and red nodes in the tree `t`.
+func (t *Tree[Data]) NodeLen() (int, int) {
+    c := t.root.countReds()
+    return t.Len() - c, c
 }
 
 func (n *node[Data]) countReds() int {
