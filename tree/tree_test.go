@@ -1,6 +1,7 @@
 package tree_test
 
 import (
+    "cmp"
     "math/rand/v2"
     "testing"
     "github.com/flxch/container/tree"
@@ -9,52 +10,74 @@ import (
 
 // Tests with trees with data values of type int.
 
-// `compare` compares the two integers `k` and `l`.  The function is used for
-// comparing the keys in the trees.  Note that we cannot just return `k` - `l`.
-// Taking the difference instead of a switch would be slightly faster.
-// However, underflow can occur, e.g., very small negative integer - very large
-// positive integer.
+// `compare` compares the two integers `k` and `l`.  Note that the result is
+// only valid for non-negative values of the type int.  For large negative
+// integers, `k` - `l` might overflow or underflow.  Currently `compare` is not
+// used in the tests and benchmarks.  Instead, `cmp.Compare` from the standard
+// library is used.  However, according to benchmarksm `compare` is
+// significantly faster than `cmp.Compare`. `compare` takes roughly the same
+// time as directly comparing integers with <, >, or == when inlined `compare`.
+// If not inlined, the time is roughly doubled.
 //go:nosplit
 func compare(k, l int) int {
-    switch {
-    case k < l: // less than
-        return -1
-    case k > l: // greater than
-        return 1
-    default:    // equal to
-        return 0
-    }
+    return k - l
 }
 
 // `build` returns a tree with the values 0, ..., `n`-1.  The values are added
 // in a random order.
 func build(n int) *tree.Tree[int] {
-    t := tree.New(compare)
+    t := tree.New[int](cmp.Compare)
     for _, v := range rand.Perm(n) {
         t.Add(v)
     }
     return t
 }
 
-// `random` returns a tree with `n` random integers.  Note that the tree can
-// contain duplicates.
+// `random` returns a tree with `n` random, non-negative integers.  Note that
+// the tree does not contain duplicates.
 func random(n int) *tree.Tree[int] {
-    t := tree.New(compare)
+    t := tree.New[int](cmp.Compare)
     for t.Len() < n {
         t.Insert(rand.Int())
     }
     return t
 }
 
+// `worst` returns a tree with the worst-case height for the elements, 0, ...,
+// `n`-1.  Insert alternating smallest and largest element.
+func worst(n int) *tree.Tree[int] {
+    t := tree.New[int](cmp.Compare)
+    for i := 0; i < n / 2; i++ {
+        t.Add(i)
+        t.Add(n - i)
+    }
+    return t
+}
+
+// `best` returns a tree with the best-case height for the elements 0, ...,
+// `n`-1.  Insert medians of remaining elements.
+func best(n int) *tree.Tree[int] {
+    t := tree.New[int](cmp.Compare)
+    for s := n / 2; s > 0; s /= 2 {
+        for i := s; i < n; i += s {
+            t.Insert(i)
+        }
+    }
+    return t
+}
+
+
 
 func TestSimple(t *testing.T) {
-    T := tree.New(compare)
+    T := tree.New[int](cmp.Compare)
 
     T.Add(1)
     T.Add(1)
     T.Add(2)
     if T.Len() != 3 {
         t.Errorf("expecting that the tree has 3 elements")
+    } else if err := T.IsLlrbTree(); err != nil {
+        t.Errorf("no left-leaning red black tree: %v", err)
     }
     if k, ok := T.Lookup(1); !ok {
         t.Errorf("expecting to find an element with the key 1 in the tree")
@@ -76,6 +99,8 @@ func TestSimple(t *testing.T) {
     T.Remove(1)
     if T.Len() != 2 {
         t.Errorf("expecting that the tree has 2 elements")
+    } else if err := T.IsLlrbTree(); err != nil {
+        t.Errorf("no left-leaning red black tree: %v", err)
     }
     if k, ok := T.Lookup(1); !ok {
         t.Errorf("expecting to find an element with the key 1 in the tree")
@@ -86,6 +111,8 @@ func TestSimple(t *testing.T) {
     T.Remove(1)
     if T.Len() != 1 {
         t.Errorf("expecting that the tree has 1 element")
+    } else if err := T.IsLlrbTree(); err != nil {
+        t.Errorf("no left-leaning red black tree: %v", err)
     }
     if _, ok := T.Lookup(1); ok {
         t.Errorf("expecting to find no element with the key 1 in the tree")
@@ -94,6 +121,8 @@ func TestSimple(t *testing.T) {
     T.Remove(1)
     if T.Len() != 1 {
         t.Errorf("expecting that the tree has 1 element")
+    } else if err := T.IsLlrbTree(); err != nil {
+        t.Errorf("no left-leaning red black tree: %v", err)
     }
     if k, ok := T.Lookup(2); !ok {
         t.Errorf("expecting to find an element with the key 2 in the tree")
@@ -108,9 +137,14 @@ func TestAddRemove(t *testing.T) {
     T := build(n)
     if T.Len() != n {
         t.Errorf("expecting that the tree has %d elements", n)
+    } else if err := T.IsLlrbTree(); err != nil {
+        t.Errorf("no left-leaning red black tree: %v", err)
     }
     for i := 0; i < n; i++ {
         T.Remove(i)
+        if err := T.IsLlrbTree(); err != nil {
+            t.Errorf("no left-leaning red black tree: %v", err)
+        }
     }
     if T.Len() != 0 {
         t.Errorf("expecting that the tree has no elements")
@@ -120,32 +154,54 @@ func TestAddRemove(t *testing.T) {
 func TestRemove(t *testing.T) {
     n := 100
     T := build(n)
+    if err := T.IsLlrbTree(); err != nil {
+        t.Errorf("no left-leaning red black tree: %v", err)
+    }
+
     if _, ok := T.Remove(n + 3); ok {
         t.Errorf("deleted non-existent item")
+    } else if err := T.IsLlrbTree(); err != nil {
+        t.Errorf("no left-leaning red black tree: %v", err)
     }
     if _, ok := T.Remove(-2); ok {
         t.Errorf("deleted non-existent item")
+    } else if err := T.IsLlrbTree(); err != nil {
+        t.Errorf("no left-leaning red black tree: %v", err)
     }
+
     for i := 0; i < n; i++ {
         if u, ok := T.Remove(i); !ok || u != i {
             t.Errorf("deletion failed")
+        } else if err := T.IsLlrbTree(); err != nil {
+            t.Errorf("no left-leaning red black tree: %v", err)
         }
     }
+
     if _, ok := T.Remove(n + 2); ok {
         t.Errorf("deleted non-existent item")
+    } else if err := T.IsLlrbTree(); err != nil {
+        t.Errorf("no left-leaning red black tree: %v", err)
     }
     if _, ok := T.Remove(-3); ok {
         t.Errorf("deleted non-existent item")
+    } else if err := T.IsLlrbTree(); err != nil {
+        t.Errorf("no left-leaning red black tree: %v", err)
     }
 }
 
 func TestPartialRemove(t *testing.T) {
     n := 100
     T := build(n)
+    if err := T.IsLlrbTree(); err != nil {
+        t.Errorf("no left-leaning red black tree: %v", err)
+    }
+
     for i := 1; i < n-1; i++ {
         v, ok := T.Remove(i)
         if !ok {
             t.Errorf("item %d not removed", i)
+        } else if err := T.IsLlrbTree(); err != nil {
+            t.Errorf("no left-leaning red black tree: %v", err)
         }
         if i != v {
             t.Errorf("item %d removed, not %d", v, i)

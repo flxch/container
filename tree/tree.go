@@ -1,5 +1,9 @@
 package tree
 
+import (
+    "github.com/flxch/container/stack"
+)
+
 
 // A variable of the type `Tree` stores the data elements in a (left-leaning)
 // red-black tree.  The data elements can be of `any` type.  A compare function
@@ -11,6 +15,9 @@ type Tree[Data any] struct {
     root    *node[Data]
     // The ordering on the elements that can be stored in the tree.
     compare func(Data, Data) int
+    // Stack that stores the visited nodes when walking down the tree.
+    path    *stack.Stack[step[Data]]
+    rebalance bool
 }
 
 // The `node` data structure represents a node in the search tree.
@@ -26,11 +33,22 @@ type node[Data any] struct {
     black bool
 }
 
+// One step in the path when walking the tree downwards.
+type step[Data any] struct {
+    // Visited node.
+    at  *node[Data]
+    // Pointer to the node's child (left or right).
+    dir **node[Data]
+}
+
 
 // `New` creates and returns a new balanced search (left-leaning red-black)
 // tree.  Tree elements are ordered by the function `cmp`.
 func New[Data any](cmp func(Data, Data) int) *Tree[Data] {
-    return &Tree[Data]{compare: cmp}
+    return &Tree[Data]{
+        compare: cmp,
+        path:    stack.New[step[Data]](),
+    }
 }
 
 // `Clone` returns a copy of the tree `t`.  The function `clone` is used to
@@ -46,6 +64,7 @@ func (t *Tree[Data]) Clone(clone func(Data) Data) *Tree[Data] {
         count:   t.count,
         root:    r,
         compare: t.compare,
+        path:    stack.New[step[Data]](),
     }
 }
 
@@ -72,6 +91,9 @@ func (n *node[Data]) clone(clone func(Data) Data, ns []node[Data]) (*node[Data],
 func (t *Tree[Data]) Reset() {
     t.count = 0
     t.root  = nil
+    // Reset stack to avoid memory leaks.
+    t.path.Reset()
+    t.path.Free(t.path.Len() - 1)
 }
 
 // `Len` returns the number of nodes in the tree `t`.
@@ -86,8 +108,7 @@ func (t *Tree[Data]) Len() int {
 func (t *Tree[Data]) Lookup(key Data) (Data, bool) {
     h := t.root
     for h != nil {
-        cmp := t.compare(key, h.data)
-        switch {
+        switch cmp := t.compare(key, h.data); {
         case cmp < 0:
             h = h.left
         case cmp > 0:
@@ -99,103 +120,6 @@ func (t *Tree[Data]) Lookup(key Data) (Data, bool) {
     // Key not in tree.
     var zero Data
     return zero, false
-}
-
-
-// `Remove` deletes an element with `key` from the tree `t`.  The deleted item
-// is returned together with the Boolean true.  If no element is deleted,
-// `Remove` returns an undefined value together with false.
-func (t *Tree[Data]) Remove(key Data) (Data, bool) {
-    var data Data
-    var ok   bool
-    t.root, data, ok = t.remove(t.root, key)
-    if t.root != nil {
-        t.root.black = true
-    }
-    if !ok {
-        var zero Data
-        return zero, false
-    }
-    t.count--
-    return data, true
-}
-
-func (t *Tree[Data]) remove(h *node[Data], elem Data) (*node[Data], Data, bool) {
-    if h == nil {
-        var zero Data
-        return nil, zero, false
-    }
-    var del Data
-    var ok  bool
-    cmp := t.compare(elem, h.data)
-    if cmp < 0 {
-        // The data value that should be removed is smaller than the node's data
-        // value.  That is, the value must be in the left subtree.
-        if h.left == nil {
-            // Nothing to delete, data value not present.
-            var zero Data
-            return h, zero, false
-        }
-        if h.left.isBlack() && h.left.left.isBlack() {
-            h = h.moveRedLeft()
-        }
-        // Continue search in left subtree.
-        h.left, del, ok = t.remove(h.left, elem)
-        return h.fixUp(), del, ok
-    }
-    // The data value that should be removed is equal to or greater than the
-    // node's data value, i.e., cmp >= 0.
-    if h.left.isRed() {
-        h = h.rotateRight()
-        // h has changed.  Data values may be equal now.
-        cmp = t.compare(elem, h.data)
-    }
-    if cmp == 0 && h.right == nil {
-        // The data value that should be removed equals h.data; h is the deleted
-        // node.
-        return nil, h.data, true
-    }
-    if h.right != nil && h.left != nil && h.right.isBlack() && h.right.left.isBlack() {
-        // The checks h.right != nil and h.left != nil are both necessary.
-        // moveRedRight requires that both children are not nil.
-        h = h.moveRedRight()
-        // h may has changed.  Data values may be equal now.
-        cmp = t.compare(elem, h.data)
-    }
-    if cmp == 0 {
-        // The data value that should be removed equals h.data.  Note that
-        // h.right != nil holds because otherwise we would have returned in the
-        // second to last if statement.
-        var sub *node[Data]
-        h.right, sub = h.right.removeMin()
-        if sub == nil {
-            panic("nil node in tree that should carry a data value")
-        }
-        h.data, del = sub.data, h.data
-        return h.fixUp(), del, true
-    }
-    // The data value that should be removed is greater than h.data, i.e., cmp >
-    // 0.  Continue search in right subtree.
-    h.right, del, ok = t.remove(h.right, elem)
-    return h.fixUp(), del, ok
-}
-
-// The second return argument of returnMin is the node that carries the data
-// item.
-func (h *node[Data]) removeMin() (*node[Data], *node[Data]) {
-    if h == nil {
-        panic("nil node in tree that should carry a data value")
-        return nil, nil
-    }
-    if h.left == nil {
-        return nil, h
-    }
-    if h.left.isBlack() && h.left.left.isBlack() {
-        h = h.moveRedLeft()
-    }
-    var sub *node[Data]
-    h.left, sub = h.left.removeMin()
-    return h.fixUp(), sub
 }
 
 
@@ -220,6 +144,8 @@ func (t *Tree[Data]) add(h *node[Data], elem Data) *node[Data] {
         }
         return h.walkUp()
     }
+
+    // elem is equal to or greater than h's value.
     if h.right == nil {
         h.right = &node[Data]{data: elem}
     } else {
@@ -229,33 +155,98 @@ func (t *Tree[Data]) add(h *node[Data], elem Data) *node[Data] {
 }
 
 
-// `Insert` inserts the element `elem` into the tree `t`.  In contrast to `Add`,
-// `Insert` replaces an existing element of the same order with `elem`.
-// `Insert` returns the replaced element (the returned value is undefined, if
-// `elem` does not replace an element in `t`).  The second return value is true
-// if an element was replaced (i.e., the returned element existed in the tree).
+// `Insert` inserts the element `elem` into the tree `t`.  If `t` already
+// contains an element with the same order, `Insert` replaces it with `elem` and
+// returns it and the Boolean return value is true.  The returned value is
+// undefined and the Boolean value is false, if `elem` does not replace an
+// element in `t`, i.e., `elem` is new.
 func (t *Tree[Data]) Insert(elem Data) (Data, bool) {
     var repl Data
     var ok   bool
-    t.root, repl, ok = t.insert(t.root, elem)
-    t.root.black = true
-    if !ok {
+    t.rebalance = true
+    if t.root, repl, ok = t.insert(t.root, elem); !ok {
         // New element, i.e., the element did not replace any element.
         t.count++
+        // Root is by convention always colored black.
+        t.root.black = true
     }
     return repl, ok
 }
 
+// Non-recursive implementation of inserting an element.  The implementation
+// uses a stack.  The stack could be avoided when adding parent pointers to
+// nodes.
 func (t *Tree[Data]) insert(h *node[Data], elem Data) (*node[Data], Data, bool) {
+    // Walk down the search tree.
+    for h != nil {
+        switch cmp := t.compare(elem, h.data); {
+        case cmp < 0:
+            t.path.Push(step[Data]{at: h, dir: &h.left})
+            h = h.left
+        case cmp > 0:
+            t.path.Push(step[Data]{at: h, dir: &h.right})
+            h = h.right
+        default:
+            // Replace the node's data item.  No need to rebalance the tree.
+            // Return immediately.
+            repl := h.data
+            h.data = elem
+            t.path.Reset()
+            return t.root, repl, true
+        }
+    }
+
+    // Create new red tree node that stores the new element.
+    h = &node[Data]{data: elem}
+
+    // Walk up the search tree and rebalance the tree.
+    for {
+        s, ok := t.path.Pop()
+        if !ok {
+            // At root.
+            var zero Data
+            return h, zero, false
+        }
+
+        // Link child to node from the stack.
+        *s.dir = h
+        if h.isBlack() {
+            // No further rebalancing necessary.  Stop walking up to the root by
+            // returning here.
+            t.path.Reset()
+            var zero Data
+            return t.root, zero, false
+        }
+
+        // Local rebalancing operations while walking up.
+        if s.at.right.isRed() && s.at.left.isBlack() {
+            // Lean left.
+            s.at = s.at.rotateLeft()
+        } else if s.at.left.isRed() && s.at.left.left.isRed() {
+            // Balance 4-node.
+            s.at = s.at.rotateRight()
+        }
+        if s.at.left.isRed() && s.at.right.isRed() {
+            // Split 4-node.
+            s.at.flip()
+        }
+        h = s.at
+    }
+}
+
+
+// Recursive implementation of inserting an element.
+func (t *Tree[Data]) _insert(h *node[Data], elem Data) (*node[Data], Data, bool) {
     if h == nil {
-        // Add the new data item.
+        // Add node with the new data element.
         var zero Data
         return &node[Data]{data: elem}, zero, false
     }
+
+    // Walk down the search tree.
     var repl Data
     var ok   bool
-    cmp := t.compare(elem, h.data)
-    switch {
+    switch cmp := t.compare(elem, h.data); {
     case cmp < 0:
         h.left, repl, ok = t.insert(h.left, elem)
     case cmp > 0:
@@ -263,21 +254,151 @@ func (t *Tree[Data]) insert(h *node[Data], elem Data) (*node[Data], Data, bool) 
     default:
         // Replace the node's data item.
         h.data, repl, ok = elem, h.data, true
+        t.rebalance = false
     }
-    return h.walkUp(), repl, ok
+
+    //return h.walkUp(), repl, ok
+    if !t.rebalance {
+        // No rebalancing necessary.  Stop walking up to the root by
+        // returning here.
+        return h, repl, ok
+    }
+    // Walk up and rebalance tree.
+    if h.right.isRed() && h.left.isBlack() {
+        // Lean left.
+        h = h.rotateLeft()
+    } else if h.left.isRed() && h.left.left.isRed() {
+        // Balance 4-node.
+        h = h.rotateRight()
+    }
+    if h.left.isRed() && h.right.isRed() {
+        // Split 4-node.
+        h.flip()
+    }
+    if h.isBlack() {
+        // Stop rebalancing while walking up.
+        t.rebalance = false
+    }
+    return h, repl, ok
+}
+
+
+// `Remove` deletes an element with `key` from the tree `t`.  The deleted item
+// is returned together with the Boolean true.  If no element is deleted,
+// `Remove` returns an undefined value together with false.
+func (t *Tree[Data]) Remove(key Data) (Data, bool) {
+    var data Data
+    var ok   bool
+    t.root, data, ok = t.remove(t.root, key)
+    if t.root != nil {
+        t.root.black = true
+    }
+    if !ok {
+        var zero Data
+        return zero, false
+    }
+    t.count--
+    return data, true
+}
+
+// Recursive implementation of removing an element.
+func (t *Tree[Data]) remove(h *node[Data], elem Data) (*node[Data], Data, bool) {
+    if h == nil {
+        var zero Data
+        return nil, zero, false
+    }
+    var del Data
+    var ok  bool
+    cmp := t.compare(elem, h.data)
+    if cmp < 0 {
+        // The data value that should be removed is smaller than the node's data
+        // value.  That is, only the left subtree can have a node with an equal
+        // value.
+        if h.left == nil {
+            // Nothing to delete, data value not present in tree.
+            var zero Data
+            return h, zero, false
+        }
+        if h.left.isBlack() && h.left.left.isBlack() {
+            h = h.moveRedLeft()
+        }
+        // Continue search in left subtree.
+        h.left, del, ok = t.remove(h.left, elem)
+        return h.fixUp(), del, ok
+    }
+    // The data value that should be removed is equal to or greater than the
+    // node's data value, i.e., cmp >= 0.
+    if h.left.isRed() {
+        h = h.rotateRight()
+        // h has changed.  Data values may be equal now.
+        cmp = t.compare(elem, h.data)
+    }
+    if cmp == 0 && h.right == nil {
+        // The data value that should be removed equals h.data; h is the deleted
+        // node.  No parent.
+        return nil, h.data, true
+    }
+    if h.right != nil && h.left != nil && h.right.isBlack() && h.right.left.isBlack() {
+        // The checks h.right != nil and h.left != nil are both necessary.
+        // moveRedRight requires that both children are not nil.
+        h = h.moveRedRight()
+        // h may has changed.  Data values may be equal now.
+        cmp = t.compare(elem, h.data)
+    }
+    if cmp == 0 {
+        // The data value that should be removed equals h.data.  Note that
+        // h.right != nil holds because otherwise we would have returned in the
+        // second to last if statement.
+        // NOTE: This case can be omitted, since we do not allow multiple nodes
+        // with the equal values.
+        h.right, del = h.right.removeMin()
+        //if sub == nil {
+        //    panic("nil node in tree that should carry a data value")
+        //}
+        // Swap deleted data with the node's data.
+        // NOTE: Not sure why this is necessar.
+        h.data, del = del, h.data
+        return h.fixUp(), del, true
+    }
+    // The data value that should be removed is greater than h.data, i.e., cmp >
+    // 0.  Continue search in right subtree.
+    h.right, del, ok = t.remove(h.right, elem)
+    return h.fixUp(), del, ok
+}
+
+// `returnMin` returns the minimal element reachable from `h` and the parent
+// node of the node with the minimal element.  `h` must not be nil.
+// NOTE: It seems that `removeMin` is only necessary when the tree contains
+// multiple elements with the same key.  However, since we do not allow this, we
+// could avoid this function.
+func (h *node[Data]) removeMin() (*node[Data], Data) {
+    if h.left == nil {
+        // At the node with minimal key value.  Since we return nil for the
+        // parent, the node will be removed from the tree.
+        return nil, h.data
+    }
+
+    // h's left child must have a smaller key value.  Continue with left child.
+    if h.left.isBlack() && h.left.left.isBlack() {
+        h = h.moveRedLeft()
+    }
+    var d Data
+    h.left, d = h.left.removeMin()
+    return h.fixUp(), d
 }
 
 
 // Rotations for the 2-3 LLRB algorithm.
 
 // Unfortunately, some of the helper functions below are not inlined by the Go
-// compiler.  Check compiler output with the `-gcflags "-m"`.  For these helper
-// functions, we use the Go compiler directive `go:nosplit` for optimizing a
-// function call to these functions.  A few nanoseconds should be saved.  This
-// is a low-level optimization, which also depends on the Go compiler version.
-// We remark that Go compiler directives are not guaranteed to be backward
-// compatible.  However, overall it is currently unclear whether this
-// optimization is worthwhile to have.
+// compiler.  Check compiler output with the `-gcflags "-m"`.  For some of the
+// helper functions, we inlined the functions by hand.  Benchmarks show that
+// this is beneficial.  For some other helper functions, we use the Go compiler
+// directive `go:nosplit` for optimizing a function call to these functions.  A
+// few nanoseconds should be saved.  This is a low-level optimization, which
+// also depends on the Go compiler version.  We remark that Go compiler
+// directives are not guaranteed to be backward compatible.  However, overall it
+// is currently unclear whether this optimization is worthwhile to have.
 
 // Furthermore, note that although a tree's compare function is typically very
 // small and can be inlined in the tree functions like `Add` and `Remove`, it
@@ -285,15 +406,37 @@ func (t *Tree[Data]) insert(h *node[Data], elem Data) (*node[Data], Data, bool) 
 // pointer.  Thus, a few additional nanoseconds are saved when using the Go
 // compiler directive `go:nosplit` also for the compare function.
 
+
+// Used when inserting a node.  Inlined by hand.
 //go:nosplit
 func (h *node[Data]) walkUp() *node[Data] {
     if h.right.isRed() && h.left.isBlack() {
+        // Lean left.
         h = h.rotateLeft()
-    }
-    if h.left.isRed() && h.left.left.isRed() {
+    } else if h.left.isRed() && h.left.left.isRed() {
+        // Balance 4-node.
         h = h.rotateRight()
     }
     if h.left.isRed() && h.right.isRed() {
+        // Split 4-node.
+        h.flip()
+    }
+    return h
+}
+
+// Used when removing a node.
+//go:nosplit
+func (h *node[Data]) fixUp() *node[Data] {
+    if h.right.isRed() {
+        // Lean left.
+        h = h.rotateLeft()
+    }
+    if h.left.isRed() && h.left.left.isRed() {
+        // Balance 4-node.
+        h = h.rotateRight()
+    }
+    if h.left.isRed() && h.right.isRed() {
+        // Split 4-node.
         h.flip()
     }
     return h
@@ -321,6 +464,7 @@ func (h *node[Data]) isBlack() bool {
     }
     return h.black
 }
+
 
 // Internal node manipulation routines.
 
@@ -383,16 +527,3 @@ func (h *node[Data]) moveRedRight() *node[Data] {
     return h
 }
 
-//go:nosplit
-func (h *node[Data]) fixUp() *node[Data] {
-    if h.right.isRed() {
-        h = h.rotateLeft()
-    }
-    if h.left.isRed() && h.left.left.isRed() {
-        h = h.rotateRight()
-    }
-    if h.left.isRed() && h.right.isRed() {
-        h.flip()
-    }
-    return h
-}

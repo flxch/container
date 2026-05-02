@@ -1,6 +1,8 @@
 package tree_test
 
+
 import (
+    "cmp"
     "slices"
     "testing"
     "github.com/flxch/container/tree"
@@ -9,7 +11,7 @@ import (
 
 func TestWalkAscendGeq(t *testing.T) {
     expected := []int{1, 3, 4, 6}
-    T := tree.New(compare)
+    T := tree.New[int](cmp.Compare)
     T.Add(4)
     T.Add(6)
     T.Add(1)
@@ -43,7 +45,7 @@ func TestWalkAscendGeq(t *testing.T) {
 
 func TestWalkDescendLeq(t *testing.T) {
     expected := []int{6, 4, 3, 1}
-    T := tree.New(compare)
+    T := tree.New[int](cmp.Compare)
     T.Add(4)
     T.Add(6)
     T.Add(1)
@@ -89,7 +91,7 @@ func TestOrder(t *testing.T) {
 }
 
 func TestReverseOrder(t *testing.T) {
-    T := tree.New(compare)
+    T := tree.New[int](cmp.Compare)
     n := 100
     for i := 0; i < n; i++ {
         T.Add(n - i)
@@ -106,7 +108,7 @@ func TestReverseOrder(t *testing.T) {
 
 
 func TestEmptyAscend(t *testing.T) {
-    T := tree.New(compare)
+    T := tree.New[int](cmp.Compare)
     ds := make([]int, 0, 10)
     for d := range T.Ascend {
         t.Logf("%v ", d)
@@ -130,7 +132,7 @@ func TestNonemptyAscend(t *testing.T) {
 }
 
 func TestEmptyDescend(t *testing.T) {
-    T := tree.New(compare)
+    T := tree.New[int](cmp.Compare)
     ds := make([]int, 0, 10)
     for d := range T.Descend {
         t.Logf("%v ", d)
@@ -152,3 +154,4 @@ func TestNonemptyDescend(t *testing.T) {
         t.Errorf("data values do not match: %v", ds)
     }
 }
+

@@ -29,3 +29,32 @@
 
 package tree
 
+
+// TODOs:
+// * Non-recursive implementation of Remove.
+// * Delete the Add method that allows one to insert duplicates.
+// * Use an interface for comparison:
+//   ```
+//   interface Comparer[T any] struct {
+//       Compare(T) int
+//    }
+//
+//   type Tree[Data Comparer[Data]] struct {
+//       ...
+//   }
+//
+//   type node[Data Comparer[Data]] struct {
+//       ...
+//   }
+//   ```
+//   The advantage is that the compiler will inline the Compare function,
+//   provided it is short.  No inlining, when using a function pointer to the
+//   comparison function.  A disadvantage is though that one must define a new
+//   type that implements the Comparer interface.
+//   See https://go.dev/blog/generic-interfaces.
+//   Define this interface in the container package.  Furthermore, change other
+//   packages like skiplist accordingly.
+// * Change method names: Clear instead of Reset, Insert instead of Add, and
+//   Delete instead of Remove.  These seem to be the names used in Go.  Rename
+//   methods also in the other packages.
+

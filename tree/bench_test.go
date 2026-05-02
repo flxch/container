@@ -1,6 +1,7 @@
 package tree_test
 
 import (
+    "cmp"
     "fmt"
     "math/rand/v2"
     "testing"
@@ -17,6 +18,36 @@ import (
 var sizes []int = []int{100, 1000, 10000}
 
 var global *tree.Tree[int]
+
+// Benchmark the lookup of an existing value in a tree.
+func BenchmarkTree_Lookup(b *testing.B) {
+    for _, size := range sizes {
+        b.Run(fmt.Sprintf("%d", size), func(b *testing.B) {
+            b.StopTimer()
+            b.ReportAllocs()
+            // Generate a random tree containing `size` values.
+            global = random(size)
+            for i := 0; i < b.N; i++ {
+                // Insert the value first, since we want to benchmark the lookup
+                // of an existing value.
+                var value int
+                for {
+                    value = rand.Int()
+                    if _, ok := global.Lookup(value); !ok {
+                        global.Add(value)
+                        break
+                    }
+                }
+                b.StartTimer()
+                _, _ = global.Lookup(value)
+                b.StopTimer()
+                // Remove the value again, since we want to benchmark the lookup
+                // of a value for a tree of a fixed size.
+                global.Remove(value)
+            }
+        })
+    }
+}
 
 // Benchmark the insertion of a value into a tree.
 func BenchmarkTree_Add(b *testing.B) {
@@ -102,36 +133,6 @@ func BenchmarkTree_Remove(b *testing.B) {
     }
 }
 
-// Benchmark the lookup of an existing value in a tree.
-func BenchmarkTree_Lookup(b *testing.B) {
-    for _, size := range sizes {
-        b.Run(fmt.Sprintf("%d", size), func(b *testing.B) {
-            b.StopTimer()
-            b.ReportAllocs()
-            // Generate a random tree containing `size` values.
-            global = random(size)
-            for i := 0; i < b.N; i++ {
-                // Insert the value first, since we want to benchmark the lookup
-                // of an existing value.
-                var value int
-                for {
-                    value = rand.Int()
-                    if _, ok := global.Lookup(value); !ok {
-                        global.Add(value)
-                        break
-                    }
-                }
-                b.StartTimer()
-                _, _ = global.Lookup(value)
-                b.StopTimer()
-                // Remove the value again, since we want to benchmark the lookup
-                // of a value for a tree of a fixed size.
-                global.Remove(value)
-            }
-        })
-    }
-}
-
 
 // Benchmark the cloning of a tree.
 var clone *tree.Tree[int]
@@ -161,7 +162,7 @@ func BenchmarkBuild(b *testing.B) {
     b.StopTimer()
     b.ReportAllocs()
     perm := rand.Perm(100000)
-    base := tree.New(compare)
+    base := tree.New[int](cmp.Compare)
     for _, v := range perm[0:50000] {
         base.Add(v)
     }

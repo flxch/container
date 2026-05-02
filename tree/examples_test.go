@@ -63,3 +63,4 @@ func ExampleTree_Ascend() {
     // 10
     // 20
 }
+

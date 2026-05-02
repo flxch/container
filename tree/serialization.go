@@ -28,6 +28,7 @@ func (t *Tree[Data]) String() string {
     return b.String()
 }
 
+
 // `MarshalJSON` returns the JSON representation of the tree `t` as a list in
 // which the tree elements are ordered ascendingly.
 func (t *Tree[Data]) MarshalJSON() ([]byte, error) {

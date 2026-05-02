@@ -1,5 +1,6 @@
 package tree_test
 
+
 import (
     "fmt"
     "testing"
@@ -121,3 +122,4 @@ func TestUnmarshalJSON(t *testing.T) {
         t.Errorf("expected a tree with three elements")
     }
 }
+
