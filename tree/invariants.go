@@ -2,7 +2,6 @@ package tree
 
 import (
     "fmt"
-    "math"
     "slices"
     "github.com/flxch/container/option"
 )
@@ -113,16 +112,12 @@ func (t *Tree[Data]) isBlackBalanced() error {
         return nil
     }
 
-    m := math.MaxInt
-    n := math.MinInt
+    p := t.PathLen()
     for _, c := range paths {
-        m = min(m, c)
-        n = max(n, c)
+        if p != c {
+            return fmt.Errorf("wrong path length %d", c)
+        }
     }
-    if m != n {
-        return fmt.Errorf("min path length is %d and max path length is %d", m, n)
-    }
-
     return nil
 }
 

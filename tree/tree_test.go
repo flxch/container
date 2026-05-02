@@ -45,6 +45,7 @@ func random(n int) *tree.Tree[int] {
 
 // `worst` returns a tree with the worst-case height for the elements, 0, ...,
 // `n`-1.  Insert alternating smallest and largest element.
+// NOTE: Not the worst case!
 func worst(n int) *tree.Tree[int] {
     t := tree.New[int](cmp.Compare)
     for i := 0; i < n / 2; i++ {
@@ -63,9 +64,54 @@ func best(n int) *tree.Tree[int] {
             t.Insert(i)
         }
     }
+    t.Insert(0)
     return t
 }
 
+
+func TestBuild(t *testing.T) {
+    T := build(65536)
+    t.Logf("path length: %d", T.PathLen())
+    t.Logf("red nodes: %d", T.RedLen())
+    if T.Len() != 65536 {
+        t.Logf("wrong tree size: %d", T.Len())
+    } else if err := T.IsLlrbTree(); err != nil {
+        t.Logf("no left-leaning red black tree: %v", err)
+    }
+}
+
+func TestRandom(t *testing.T) {
+    T := random(65536)
+    t.Logf("path length: %d", T.PathLen())
+    t.Logf("red nodes: %d", T.RedLen())
+    if T.Len() != 65536 {
+        t.Logf("wrong tree size: %d", T.Len())
+    } else if err := T.IsLlrbTree(); err != nil {
+        t.Logf("no left-leaning red black tree: %v", err)
+    }
+}
+
+func TestWorst(t *testing.T) {
+    T := worst(65536)
+    t.Logf("path length: %d", T.PathLen())
+    t.Logf("red nodes: %d", T.RedLen())
+    if T.Len() != 65536 {
+        t.Logf("wrong tree size: %d", T.Len())
+    } else if err := T.IsLlrbTree(); err != nil {
+        t.Logf("no left-leaning red black tree: %v", err)
+    }
+}
+
+func TestBest(t *testing.T) {
+    T := best(65536)
+    t.Logf("path length: %d", T.PathLen())
+    t.Logf("red nodes: %d", T.RedLen())
+    if T.Len() != 65536 {
+        t.Logf("wrong tree size: %d", T.Len())
+    } else if err := T.IsLlrbTree(); err != nil {
+        t.Logf("no left-leaning red black tree: %v", err)
+    }
+}
 
 
 func TestSimple(t *testing.T) {

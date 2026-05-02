@@ -96,12 +96,14 @@ func (t *Tree[Data]) Reset() {
     t.path.Free(t.path.Len() - 1)
 }
 
+
 // `Len` returns the number of nodes in the tree `t`.
 func (t *Tree[Data]) Len() int {
     return t.count
 }
 
-// `PathLen` returns the number of black nodes from the root to a leaf.
+// `PathLen` returns the number of black nodes on a path in the tree `t` from
+// its root to a leaf.
 func (t *Tree[Data]) PathLen() int {
     c := 0
     n := t.root;
@@ -117,6 +119,22 @@ func (t *Tree[Data]) PathLen() int {
         }
     }
     return c
+}
+
+// `RedLen` returns the number of red nodes in the tree `t`.
+func (t *Tree[Data]) RedLen() int {
+    return t.root.countReds()
+}
+
+func (n *node[Data]) countReds() int {
+    if n == nil {
+        return 0
+    }
+    if n.isRed() {
+        return 1 + n.left.countReds() + n.right.countReds()
+    } else {
+        return n.left.countReds() + n.right.countReds()
+    }
 }
 
 
